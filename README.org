@@ -2,9 +2,16 @@
 
 * Setup
 
-  - src_sh{git clone https://github.com/fiddlerwoaroof/data-lens.git ~/quicklisp/local-projects/data-lens}
-  - src_sh{git clone https://github.com/fukamachi/lack.git ~/quicklisp/local-projects/lack}
-  - src_sh{sbcl --eval '(asdf:load-asd (truename "todo-backend.asd"))' --eval '(ql:quickload :todo-backend)' --eval '(fwoar.todo::ensure-started)'}
+  - src_sh[:exports code]{git clone https://github.com/fiddlerwoaroof/data-lens.git ~/quicklisp/local-projects/data-lens}
+  - src_sh[:exports code]{git clone https://github.com/fukamachi/lack.git ~/quicklisp/local-projects/lack}
+
+  #+BEGIN_SRC sh
+    sbcl --eval '(asdf:load-asd (truename "todo-backend.asd"))' 
+         --eval '(ql:quickload :todo-backend)' 
+         --eval '(fwoar.todo::ensure-started)'
+  #+END_SRC
+  
+  After this, all the tests [[http://www.todobackend.com/specs/index.html?http://localhost:5000][here]] should pass and the frontend [[http://www.todobackend.com/client/index.html?http://localhost:5000][here]] should work.
 
 * todo API
 
