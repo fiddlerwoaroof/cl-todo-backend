@@ -6,8 +6,10 @@
   :author "Ed L <edward@elangley.org>"
   :license "MIT"
   :depends-on (#:alexandria
+               #:data-lens
                #:uiop
                #:serapeum
+               #:rutilsx
                #:yason
                #:fset
                #:ningle
