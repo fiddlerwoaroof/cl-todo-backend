@@ -41,10 +41,21 @@
   (setf *todos*
         (fset:empty-map)))
 
+
+(defparameter *completed-lens*
+  (data-lens.lenses:make-hash-table-lens "completed"))
+
+(defun bool-to-yason (bool)
+  (if bool
+      'yason:true
+      'yason:false))
+
 (defun update-todo (id v)
   (setf (todo id)
         (serapeum:merge-tables (or (todo id)
                                    (make-hash-table :test 'equal))
-                               (alexandria:alist-hash-table
-                                v
-                                :test 'equal))))
+                               (data-lens.lenses:over *completed-lens*
+                                                      'bool-to-yason
+                                                      (alexandria:alist-hash-table
+                                                       v
+                                                       :test 'equal)))))
