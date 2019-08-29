@@ -1,6 +1,7 @@
 (defpackage :fwoar.lack.json.middleware
   (:use :cl)
-  (:export #:json-middleware))
+  (:export #:json-middleware
+           #:wrap-result))
 
 (defpackage :fwoar.lack.cors.middleware
   (:use :cl)

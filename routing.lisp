@@ -18,7 +18,7 @@
   `(lambda (,sym)
      (declare (ignorable ,sym))
      (success
-      (fwoar.lack.json.middleware::wrap-result
+      (fwoar.lack.json.middleware:wrap-result
        (progn ,@body)))))
 
 (defun get-id (params)
