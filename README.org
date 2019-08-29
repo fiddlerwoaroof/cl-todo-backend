@@ -280,5 +280,5 @@
 #+HTML_HEAD: </style>
 
 # Local Variables:
-# after-save-hook: (lambda nil (when (org-html-export-to-html) (rename-file "README.html" "docs/index.html" t)))
+# after-save-hook: (lambda nil (org-babel-tangle) (when (org-html-export-to-html) (rename-file "README.html" "docs/index.html" t)))
 # End:
