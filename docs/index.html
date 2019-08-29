@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2019-08-28 Wed 23:22 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TODO backend implementation using CL and fukamachi/ningle</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Langley" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<style>
+:root {
+--zenburn-fg-plus-2: #ffffef;
+--zenburn-fg-plus-1: #f5f5d6;
+--zenburn-fg: #dcdccc;
+--zenburn-bg: #3f3f3f;
+--zenburn-bg-plus-1: #4f4f4f;
+--zenburn-bg-plus-2: #5f5f5f;
+--zenburn-blue: #8cd0d3;
+}
+* {box-sizing: border-box;}
+body {
+font-size: 1.2rem;
+width: 75rem;
+margin: 0 0 0 25rem;
+background: var(--zenburn-bg);
+color: var(--zenburn-fg);
+}
+a {color: var(--zenburn-blue);}
+h1, h2, h3, h4, h5, h6 {margin: 0;}
+pre {margin: 0; box-shadow: none; border-width: 0.5em;}
+pre.example {
+background-color: var(--zenburn-bg-plus-2);
+color: var(--zenburn-fg-plus-2);
+border: none;
+padding-left: 4em;
+}
+pre.src {
+background-color: var(--zenburn-bg-plus-1);
+border-color: var(--zenburn-bg-plus-2);
+color: var(--zenburn-fg-plus-1);
+}
+pre.src::before {
+background-color: var(--zenburn-bg-plus-1);
+border-color: var(--zenburn-bg-plus-2);
+color: var(--zenburn-fg-plus-1);
+}
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">TODO backend implementation using CL and fukamachi/ningle</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org22e38cd">1. todo API</a>
+<ul>
+<li><a href="#org30c5989">1.1. List-level APIS</a></li>
+<li><a href="#org676c15a">1.2. Getting/Replacing a todo</a></li>
+<li><a href="#orga9d0c79">1.3. Adding and modifying todos</a></li>
+<li><a href="#org245bf6b">1.4. Examples</a></li>
+</ul>
+</li>
+<li><a href="#org2e8a2fb">2. Source</a>
+<ul>
+<li><a href="#orgd099240">2.1. model.lisp source code</a></li>
+<li><a href="#org2e445bb">2.2. routing.lisp source</a></li>
+<li><a href="#org4fedef0">2.3. main.lisp source</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org22e38cd" class="outline-2">
+<h2 id="org22e38cd"><span class="section-number-2">1</span> todo API</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+We use a fairly simple structure for our "database": a fset map (a
+clojure-inspired persistent data structure) and a handful of
+interface functions that wrap it. In this code, this fset map is
+referenced as <code>*todo*</code>, but this is a detail hidden behind the API.
+</p>
+</div>
+
+<div id="outline-container-org30c5989" class="outline-3">
+<h3 id="org30c5989"><span class="section-number-3">1.1</span> List-level APIS</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+These are functions for getting the todo list and clearing it.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp" id="org6199316"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">todos</span> <span style="color: #93a8c6;">()</span>
+  <span style="color: #93a8c6;">(</span>gmap:gmap <span style="font-weight: bold;">:seq</span>
+             <span style="color: #b0b1a3;">(</span><span style="color: #F0DFAF;">lambda</span> <span style="color: #97b098;">(</span>_ b<span style="color: #97b098;">)</span>
+               <span style="color: #97b098;">(</span><span style="color: #F0DFAF;">declare</span> <span style="color: #aebed8;">(</span>ignore _<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span>
+               b<span style="color: #b0b1a3;">)</span>
+             <span style="color: #b0b1a3;">(</span><span style="font-weight: bold;">:map</span> *todos*<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">clear-todos</span> <span style="color: #93a8c6;">()</span>
+  <span style="color: #93a8c6;">(</span>setf *todos*
+        <span style="color: #b0b1a3;">(</span>fset:empty-map<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org676c15a" class="outline-3">
+<h3 id="org676c15a"><span class="section-number-3">1.2</span> Getting/Replacing a todo</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+This uses lisp's <a href="http://www.lispworks.com/documentation/HyperSpec/Body/05_a.htm">generalized references</a> to abstract away the
+storage details of the todos. We also provide a <code>delete-todo</code>
+function for removing a todo from the list.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp" id="org1952c5b"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">todo</span> <span style="color: #93a8c6;">(</span>id<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">let</span> <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span>todo <span style="color: #aebed8;">(</span>fset:@ *todos* id<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
+    todo<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #93a8c6;">(</span><span style="color: #8CD0D3;">setf todo</span><span style="color: #93a8c6;">)</span> <span style="color: #93a8c6;">(</span>new-value id<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span>setf <span style="color: #b0b1a3;">(</span>fset:@ *todos* id<span style="color: #b0b1a3;">)</span>
+        new-value<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">delete-todo</span> <span style="color: #93a8c6;">(</span>id<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span>setf *todos*
+        <span style="color: #b0b1a3;">(</span>fset:less *todos* id<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga9d0c79" class="outline-3">
+<h3 id="orga9d0c79"><span class="section-number-3">1.3</span> Adding and modifying todos</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+<code>new-todo</code> is fairly trivial. It's main feature is that it has to
+make sure the <code>completed</code> and <code>url</code> keys are set to the appropriate
+values. Completed isn't a lisp boolean, so it serializes to JSON
+properly.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp" id="org32926f6"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">new-todo</span> <span style="color: #93a8c6;">(</span>value<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">let</span> <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span>id <span style="color: #aebed8;">(</span>next-id<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
+    <span style="color: #b0b1a3;">(</span>setf <span style="color: #97b098;">(</span>todo id<span style="color: #97b098;">)</span>
+          <span style="color: #97b098;">(</span>alexandria:alist-hash-table
+           <span style="color: #aebed8;">(</span>rutilsx.threading:-&gt;&gt;
+            value
+            <span style="color: #b0b0b3;">(</span>acons <span style="color: #D0BF8F;">"completed"</span> 'yason:false<span style="color: #b0b0b3;">)</span>
+            <span style="color: #b0b0b3;">(</span>acons <span style="color: #D0BF8F;">"url"</span> <span style="color: #90a890;">(</span>format nil <span style="color: #D0BF8F;">"http://localhost:5000/todo/~d"</span> id<span style="color: #90a890;">)</span><span style="color: #b0b0b3;">)</span><span style="color: #aebed8;">)</span>
+           <span style="font-weight: bold;">:test</span> 'equal<span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+</pre>
+</div>
+
+<p>
+<code>update-todo</code> just merges the input from the frontend into the
+relevant todo and then makes sure that the <code>completed</code> key is a
+yason-compatible boolean.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp" id="org81fabb9"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">update-todo</span> <span style="color: #93a8c6;">(</span>id v<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span>setf <span style="color: #b0b1a3;">(</span>todo id<span style="color: #b0b1a3;">)</span>
+        <span style="color: #b0b1a3;">(</span>serapeum:merge-tables <span style="color: #97b098;">(</span>or <span style="color: #aebed8;">(</span>todo id<span style="color: #aebed8;">)</span>
+                                   <span style="color: #aebed8;">(</span>make-hash-table <span style="font-weight: bold;">:test</span> 'equal<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span>
+                               <span style="color: #97b098;">(</span>data-lens.lenses:over *completed-lens*
+                                                      'bool-to-yason
+                                                      <span style="color: #aebed8;">(</span>alexandria:alist-hash-table
+                                                       v
+                                                       <span style="font-weight: bold;">:test</span> 'equal<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org245bf6b" class="outline-3">
+<h3 id="org245bf6b"><span class="section-number-3">1.4</span> Examples</h3>
+<div class="outline-text-3" id="text-1-4">
+<div class="org-src-container">
+<pre class="src src-lisp"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">in-package</span> <span style="font-weight: bold;">:fwoar.todo</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span>load <span style="color: #D0BF8F;">"pprint-setup"</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">with-fresh-todos</span> <span style="color: #93a8c6;">()</span>
+  <span style="color: #93a8c6;">(</span>new-todo '<span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span><span style="color: #D0BF8F;">"title"</span> . <span style="color: #D0BF8F;">"get groceries"</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span>new-todo '<span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span><span style="color: #D0BF8F;">"title"</span> . <span style="color: #D0BF8F;">"write-better-documentation"</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span>fset:convert 'list <span style="color: #b0b1a3;">(</span>todos<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+</pre>
+</div>
+
+<pre class="example">
+(#&lt;hash-table "url": "http://localhost:5000/todo/15",
+              "title": "get groceries",
+              "completed": YASON:FALSE&gt;
+ #&lt;hash-table "url": "http://localhost:5000/todo/16",
+              "title": "write-better-documentation",
+              "completed": YASON:FALSE&gt;)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2e8a2fb" class="outline-2">
+<h2 id="org2e8a2fb"><span class="section-number-2">2</span> Source</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-orgd099240" class="outline-3">
+<h3 id="orgd099240"><span class="section-number-3">2.1</span> model.lisp source code</h3>
+<div class="outline-text-3" id="text-2-1">
+<div class="org-src-container">
+<pre class="src src-lisp"><span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">[[file:~/git_repos/lisp-sandbox/todo/README.org::package-include][package-include]]</span>
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">in-package</span> <span style="font-weight: bold;">:fwoar.todo</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">package-include ends here</span>
+<span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">[[file:~/git_repos/lisp-sandbox/todo/README.org::model-utils][model-utils]]</span>
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defparameter</span> <span style="color: #DC8CC3;">*cur-id*</span> 0<span style="color: #8c8c8c;">)</span>
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">next-id</span> <span style="color: #93a8c6;">()</span>
+  <span style="color: #93a8c6;">(</span>incf *cur-id*<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defparameter</span> <span style="color: #DC8CC3;">*completed-lens*</span>
+  <span style="color: #93a8c6;">(</span>data-lens.lenses:make-hash-table-lens <span style="color: #D0BF8F;">"completed"</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">bool-to-yason</span> <span style="color: #93a8c6;">(</span>bool<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">if</span> bool
+      'yason:true
+      'yason:false<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+<span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">model-utils ends here</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defvar</span> <span style="color: #DC8CC3;">*todos*</span> <span style="color: #93a8c6;">(</span>fset:empty-map<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">[[file:~/git_repos/lisp-sandbox/todo/README.org::todolist-manipulation][todolist-manipulation]]</span>
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">todos</span> <span style="color: #93a8c6;">()</span>
+  <span style="color: #93a8c6;">(</span>gmap:gmap <span style="font-weight: bold;">:seq</span>
+             <span style="color: #b0b1a3;">(</span><span style="color: #F0DFAF;">lambda</span> <span style="color: #97b098;">(</span>_ b<span style="color: #97b098;">)</span>
+               <span style="color: #97b098;">(</span><span style="color: #F0DFAF;">declare</span> <span style="color: #aebed8;">(</span>ignore _<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span>
+               b<span style="color: #b0b1a3;">)</span>
+             <span style="color: #b0b1a3;">(</span><span style="font-weight: bold;">:map</span> *todos*<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">clear-todos</span> <span style="color: #93a8c6;">()</span>
+  <span style="color: #93a8c6;">(</span>setf *todos*
+        <span style="color: #b0b1a3;">(</span>fset:empty-map<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+<span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">todolist-manipulation ends here</span>
+
+<span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">[[file:~/git_repos/lisp-sandbox/todo/README.org::todo-accessor][todo-accessor]]</span>
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">todo</span> <span style="color: #93a8c6;">(</span>id<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">let</span> <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span>todo <span style="color: #aebed8;">(</span>fset:@ *todos* id<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
+    todo<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #93a8c6;">(</span><span style="color: #8CD0D3;">setf todo</span><span style="color: #93a8c6;">)</span> <span style="color: #93a8c6;">(</span>new-value id<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span>setf <span style="color: #b0b1a3;">(</span>fset:@ *todos* id<span style="color: #b0b1a3;">)</span>
+        new-value<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">delete-todo</span> <span style="color: #93a8c6;">(</span>id<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span>setf *todos*
+        <span style="color: #b0b1a3;">(</span>fset:less *todos* id<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+<span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">todo-accessor ends here</span>
+
+<span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">[[file:~/git_repos/lisp-sandbox/todo/README.org::new-todo][new-todo]]</span>
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">new-todo</span> <span style="color: #93a8c6;">(</span>value<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">let</span> <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span>id <span style="color: #aebed8;">(</span>next-id<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
+    <span style="color: #b0b1a3;">(</span>setf <span style="color: #97b098;">(</span>todo id<span style="color: #97b098;">)</span>
+          <span style="color: #97b098;">(</span>alexandria:alist-hash-table
+           <span style="color: #aebed8;">(</span>rutilsx.threading:-&gt;&gt;
+            value
+            <span style="color: #b0b0b3;">(</span>acons <span style="color: #D0BF8F;">"completed"</span> 'yason:false<span style="color: #b0b0b3;">)</span>
+            <span style="color: #b0b0b3;">(</span>acons <span style="color: #D0BF8F;">"url"</span> <span style="color: #90a890;">(</span>format nil <span style="color: #D0BF8F;">"http://localhost:5000/todo/~d"</span> id<span style="color: #90a890;">)</span><span style="color: #b0b0b3;">)</span><span style="color: #aebed8;">)</span>
+           <span style="font-weight: bold;">:test</span> 'equal<span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+<span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">new-todo ends here</span>
+
+<span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">[[file:~/git_repos/lisp-sandbox/todo/README.org::update-todo][update-todo]]</span>
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">update-todo</span> <span style="color: #93a8c6;">(</span>id v<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span>setf <span style="color: #b0b1a3;">(</span>todo id<span style="color: #b0b1a3;">)</span>
+        <span style="color: #b0b1a3;">(</span>serapeum:merge-tables <span style="color: #97b098;">(</span>or <span style="color: #aebed8;">(</span>todo id<span style="color: #aebed8;">)</span>
+                                   <span style="color: #aebed8;">(</span>make-hash-table <span style="font-weight: bold;">:test</span> 'equal<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span>
+                               <span style="color: #97b098;">(</span>data-lens.lenses:over *completed-lens*
+                                                      'bool-to-yason
+                                                      <span style="color: #aebed8;">(</span>alexandria:alist-hash-table
+                                                       v
+                                                       <span style="font-weight: bold;">:test</span> 'equal<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+<span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">update-todo ends here</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defmacro</span> <span style="color: #8CD0D3;">with-fresh-todos</span> <span style="color: #93a8c6;">(</span><span style="color: #b0b1a3;">()</span> <span style="color: #CC9393;">&amp;body</span> body<span style="color: #93a8c6;">)</span>
+  `<span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">let</span> <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span>*todos* <span style="color: #aebed8;">(</span>fset:empty-map<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
+     ,@body<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2e445bb" class="outline-3">
+<h3 id="org2e445bb"><span class="section-number-3">2.2</span> routing.lisp source</h3>
+<div class="outline-text-3" id="text-2-2">
+<div class="org-src-container">
+<pre class="src src-lisp"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">in-package</span> <span style="font-weight: bold;">:fwoar.todo</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defmacro</span> <span style="color: #8CD0D3;">defroutes</span> <span style="color: #93a8c6;">(</span>app <span style="color: #CC9393;">&amp;body</span> routes<span style="color: #93a8c6;">)</span>
+  <span style="color: #D0BF8F;">"Define a set of routes for given paths. the ROUTES parameter expects this format:</span>
+<span style="color: #D0BF8F;">   ((\"/path/to/{route}\" :method :POST) route-callback) the AS-ROUTE macro helps one</span>
+<span style="color: #D0BF8F;">   avoid binding function values to the route for flexibility."</span>
+  <span style="color: #93a8c6;">(</span>alexandria:once-only <span style="color: #b0b1a3;">(</span>app<span style="color: #b0b1a3;">)</span>
+    `<span style="color: #b0b1a3;">(</span><span style="color: #F0DFAF;">progn</span>
+       ,@<span style="color: #97b098;">(</span><span style="color: #F0DFAF;">loop</span> for <span style="color: #aebed8;">(</span><span style="color: #b0b0b3;">(</span>target <span style="color: #CC9393;">&amp;key</span> method<span style="color: #b0b0b3;">)</span> callback<span style="color: #aebed8;">)</span> in routes
+               collect `<span style="color: #aebed8;">(</span>setf <span style="color: #b0b0b3;">(</span>ningle:route ,app ,target <span style="font-weight: bold;">:method</span> ,<span style="color: #90a890;">(</span>or method <span style="font-weight: bold;">:GET</span><span style="color: #90a890;">)</span><span style="color: #b0b0b3;">)</span> ,callback<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+
+<span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">routing</span>
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">success</span> <span style="color: #93a8c6;">(</span>value<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span>list 200 nil value<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defmacro</span> <span style="color: #8CD0D3;">handler</span> <span style="color: #93a8c6;">(</span><span style="color: #b0b1a3;">(</span><span style="color: #CC9393;">&amp;optional</span> <span style="color: #97b098;">(</span>sym <span style="color: #aebed8;">(</span>gensym <span style="color: #D0BF8F;">"PARAMS"</span><span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span> <span style="color: #CC9393;">&amp;body</span> body<span style="color: #93a8c6;">)</span>
+  `<span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">lambda</span> <span style="color: #b0b1a3;">(</span>,sym<span style="color: #b0b1a3;">)</span>
+     <span style="color: #b0b1a3;">(</span><span style="color: #F0DFAF;">declare</span> <span style="color: #97b098;">(</span>ignorable ,sym<span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
+     <span style="color: #b0b1a3;">(</span>success
+      <span style="color: #97b098;">(</span>fwoar.lack.json.middleware:wrap-result
+       <span style="color: #aebed8;">(</span><span style="color: #F0DFAF;">progn</span> ,@body<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">get-id</span> <span style="color: #93a8c6;">(</span>params<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span>parse-integer <span style="color: #b0b1a3;">(</span>serapeum:assocdr <span style="font-weight: bold;">:id</span> params<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">setup-routes</span> <span style="color: #93a8c6;">(</span>app<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span>defroutes app
+    <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span><span style="color: #D0BF8F;">"/"</span> <span style="font-weight: bold;">:method</span> <span style="font-weight: bold;">:GET</span><span style="color: #97b098;">)</span>            <span style="color: #97b098;">(</span>handler <span style="color: #aebed8;">()</span> <span style="color: #aebed8;">(</span>todos<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
+    <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span><span style="color: #D0BF8F;">"/"</span> <span style="font-weight: bold;">:method</span> <span style="font-weight: bold;">:POST</span><span style="color: #97b098;">)</span>           <span style="color: #97b098;">(</span>handler <span style="color: #aebed8;">(</span>v<span style="color: #aebed8;">)</span> <span style="color: #aebed8;">(</span>new-todo v<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
+    <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span><span style="color: #D0BF8F;">"/"</span> <span style="font-weight: bold;">:method</span> <span style="font-weight: bold;">:DELETE</span><span style="color: #97b098;">)</span>         <span style="color: #97b098;">(</span>handler <span style="color: #aebed8;">()</span> <span style="color: #aebed8;">(</span>clear-todos<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
+    <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span><span style="color: #D0BF8F;">"/todo/:id"</span> <span style="font-weight: bold;">:method</span> <span style="font-weight: bold;">:GET</span><span style="color: #97b098;">)</span>    <span style="color: #97b098;">(</span>handler <span style="color: #aebed8;">(</span>v<span style="color: #aebed8;">)</span> <span style="color: #aebed8;">(</span>todo <span style="color: #b0b0b3;">(</span>get-id v<span style="color: #b0b0b3;">)</span><span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
+    <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span><span style="color: #D0BF8F;">"/todo/:id"</span> <span style="font-weight: bold;">:method</span> <span style="font-weight: bold;">:DELETE</span><span style="color: #97b098;">)</span> <span style="color: #97b098;">(</span>handler <span style="color: #aebed8;">(</span>v<span style="color: #aebed8;">)</span>
+                                     <span style="color: #aebed8;">(</span>delete-todo <span style="color: #b0b0b3;">(</span>get-id v<span style="color: #b0b0b3;">)</span><span style="color: #aebed8;">)</span>
+                                     nil<span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
+    <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span><span style="color: #D0BF8F;">"/todo/:id"</span> <span style="font-weight: bold;">:method</span> <span style="font-weight: bold;">:PATCH</span><span style="color: #97b098;">)</span>  <span style="color: #97b098;">(</span>handler <span style="color: #aebed8;">(</span>v<span style="color: #aebed8;">)</span>
+                                     <span style="color: #aebed8;">(</span>update-todo <span style="color: #b0b0b3;">(</span>get-id v<span style="color: #b0b0b3;">)</span> 
+                                                  <span style="color: #b0b0b3;">(</span>remove <span style="font-weight: bold;">:id</span> v <span style="font-weight: bold;">:key</span> #'car<span style="color: #b0b0b3;">)</span><span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4fedef0" class="outline-3">
+<h3 id="org4fedef0"><span class="section-number-3">2.3</span> main.lisp source</h3>
+<div class="outline-text-3" id="text-2-3">
+<div class="org-src-container">
+<pre class="src src-lisp"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">in-package</span> <span style="font-weight: bold;">:fwoar.todo</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #A6A689; background-color: #2B2B2B;">;;; </span><span style="color: #A6A689; background-color: #2B2B2B;">entrypoint</span>
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">setup</span> <span style="color: #93a8c6;">()</span>
+  <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">let</span> <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span>app <span style="color: #aebed8;">(</span>make-instance 'ningle:&lt;app&gt;<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
+    <span style="color: #b0b1a3;">(</span><span style="color: #F0DFAF;">prog1</span> app <span style="color: #97b098;">(</span>setup-routes app<span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defvar</span> <span style="color: #DC8CC3;">*handler*</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">is-running</span> <span style="color: #93a8c6;">()</span>
+  <span style="color: #93a8c6;">(</span>and <span style="color: #b0b1a3;">(</span>boundp '*handler*<span style="color: #b0b1a3;">)</span>
+       *handler*<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">ensure-started</span> <span style="color: #93a8c6;">(</span><span style="color: #CC9393;">&amp;rest</span> r <span style="color: #CC9393;">&amp;key</span> port<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">declare</span> <span style="color: #b0b1a3;">(</span>ignore port<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">let</span> <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span>app <span style="color: #aebed8;">(</span>setup<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
+    <span style="color: #b0b1a3;">(</span>values app
+            <span style="color: #97b098;">(</span>setf *handler*
+                  <span style="color: #aebed8;">(</span><span style="color: #F0DFAF;">if</span> <span style="color: #b0b0b3;">(</span>not <span style="color: #90a890;">(</span>is-running<span style="color: #90a890;">)</span><span style="color: #b0b0b3;">)</span>
+                      <span style="color: #b0b0b3;">(</span>apply 'clack:clackup
+                             <span style="color: #90a890;">(</span>lack.builder:builder
+                              <span style="font-weight: bold;">:accesslog</span>
+                              'fwoar.lack.cors.middleware:cors-middleware
+                              'fwoar.lack.json.middleware:json-middleware
+                              app<span style="color: #90a890;">)</span>
+                             r<span style="color: #b0b0b3;">)</span>
+                      *handler*<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">stop</span> <span style="color: #93a8c6;">()</span>
+  <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">if</span> <span style="color: #b0b1a3;">(</span>is-running<span style="color: #b0b1a3;">)</span>
+      <span style="color: #b0b1a3;">(</span><span style="color: #F0DFAF;">progn</span>
+        <span style="color: #97b098;">(</span>clack:stop *handler*<span style="color: #97b098;">)</span>
+        <span style="color: #97b098;">(</span>makunbound '*handler*<span style="color: #97b098;">)</span>
+        nil<span style="color: #b0b1a3;">)</span>
+      nil<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Langley</p>
+<p class="date">Created: 2019-08-28 Wed 23:22</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

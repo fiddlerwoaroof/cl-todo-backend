@@ -1,0 +1,284 @@
+#+TITLE: TODO backend implementation using CL and fukamachi/ningle
+
+* todo API
+
+  We use a fairly simple structure for our "database": a fset map (a
+  clojure-inspired persistent data structure) and a handful of
+  interface functions that wrap it. In this code, this fset map is
+  referenced as =*todo*=, but this is a detail hidden behind the API.
+  
+** List-level APIS
+   
+   These are functions for getting the todo list and clearing it.
+
+   #+NAME: todolist-manipulation
+   #+BEGIN_SRC lisp :tangle no
+     (defun todos ()
+       (gmap:gmap :seq
+                  (lambda (_ b)
+                    (declare (ignore _))
+                    b)
+                  (:map *todos*)))
+
+     (defun clear-todos ()
+       (setf *todos*
+             (fset:empty-map)))
+   #+END_SRC
+  
+** Getting/Replacing a todo
+   
+   This uses lisp's [[http://www.lispworks.com/documentation/HyperSpec/Body/05_a.htm][generalized references]] to abstract away the
+   storage details of the todos. We also provide a =delete-todo=
+   function for removing a todo from the list.
+   
+   #+NAME: todo-accessor
+   #+BEGIN_SRC lisp :tangle no
+     (defun todo (id)
+       (let ((todo (fset:@ *todos* id)))
+         todo))
+
+     (defun (setf todo) (new-value id)
+       (setf (fset:@ *todos* id)
+             new-value))
+
+     (defun delete-todo (id)
+       (setf *todos*
+             (fset:less *todos* id)))
+   #+END_SRC
+   
+** Adding and modifying todos
+
+   =new-todo= is fairly trivial. It's main feature is that it has to
+   make sure the =completed= and =url= keys are set to the appropriate
+   values. Completed isn't a lisp boolean, so it serializes to JSON
+   properly.
+
+   #+NAME: new-todo
+   #+BEGIN_SRC lisp :tangle no
+     (defun new-todo (value)
+       (let ((id (next-id)))
+         (setf (todo id)
+               (alexandria:alist-hash-table
+                (rutilsx.threading:->>
+                 value
+                 (acons "completed" 'yason:false)
+                 (acons "url" (format nil "http://localhost:5000/todo/~d" id)))
+                :test 'equal))))
+   #+END_SRC
+
+   =update-todo= just merges the input from the frontend into the
+   relevant todo and then makes sure that the =completed= key is a
+   yason-compatible boolean.
+
+   #+NAME: update-todo
+   #+BEGIN_SRC lisp :tangle no
+     (defun update-todo (id v)
+       (setf (todo id)
+             (serapeum:merge-tables (or (todo id)
+                                        (make-hash-table :test 'equal))
+                                    (data-lens.lenses:over *completed-lens*
+                                                           'bool-to-yason
+                                                           (alexandria:alist-hash-table
+                                                            v
+                                                            :test 'equal)))))
+   #+END_SRC
+
+** Examples
+  
+   #+BEGIN_SRC lisp :tangle no :noweb yes :exports both :results verbatim
+     <<example-setup>>
+     (with-fresh-todos ()
+       (new-todo '(("title" . "get groceries")))
+       (new-todo '(("title" . "write-better-documentation")))
+       (fset:convert 'list (todos)))
+   #+END_SRC
+  
+   #+RESULTS:
+   : (#<hash-table "url": "http://localhost:5000/todo/22",
+   :               "title": "get groceries",
+   :               "completed": YASON:FALSE>
+   :  #<hash-table "url": "http://localhost:5000/todo/23",
+   :               "title": "write-better-documentation",
+   :               "completed": YASON:FALSE>)
+  
+* Source
+** model.lisp source code
+
+   #+BEGIN_SRC lisp :tangle model.lisp :noweb yes :comments noweb
+     <<package-include>>
+     <<model-utils>>
+
+     (defvar *todos* (fset:empty-map))
+
+     <<todolist-manipulation>>
+
+     <<todo-accessor>>
+
+     <<new-todo>>
+
+     <<update-todo>>
+
+     (defmacro with-fresh-todos (() &body body)
+       `(let ((*todos* (fset:empty-map)))
+          ,@body))
+   #+END_SRC
+
+** routing.lisp source 
+
+   #+BEGIN_SRC lisp :tangle routing.lisp :noweb yes
+   <<package-include>>
+   (defmacro defroutes (app &body routes)
+     "Define a set of routes for given paths. the ROUTES parameter expects this format:
+      ((\"/path/to/{route}\" :method :POST) route-callback) the AS-ROUTE macro helps one
+      avoid binding function values to the route for flexibility."
+     (alexandria:once-only (app)
+       `(progn
+          ,@(loop for ((target &key method) callback) in routes
+                  collect `(setf (ningle:route ,app ,target :method ,(or method :GET)) ,callback)))))
+
+
+   ;; routing
+   (defun success (value)
+     (list 200 nil value))
+
+   (defmacro handler ((&optional (sym (gensym "PARAMS"))) &body body)
+     `(lambda (,sym)
+        (declare (ignorable ,sym))
+        (success
+         (fwoar.lack.json.middleware:wrap-result
+          (progn ,@body)))))
+
+   (defun get-id (params)
+     (parse-integer (serapeum:assocdr :id params)))
+
+   (defun setup-routes (app)
+     (defroutes app
+       (("/" :method :GET)            (handler () (todos)))
+       (("/" :method :POST)           (handler (v) (new-todo v)))
+       (("/" :method :DELETE)         (handler () (clear-todos)))
+       (("/todo/:id" :method :GET)    (handler (v) (todo (get-id v))))
+       (("/todo/:id" :method :DELETE) (handler (v)
+                                        (delete-todo (get-id v))
+                                        nil))
+       (("/todo/:id" :method :PATCH)  (handler (v)
+                                        (update-todo (get-id v) 
+                                                     (remove :id v :key #'car))))))
+   #+END_SRC
+
+** main.lisp source 
+
+   #+BEGIN_SRC lisp :tangle main.lisp :noweb yes
+   <<package-include>>
+   ;;; entrypoint
+   (defun setup ()
+     (let ((app (make-instance 'ningle:<app>)))
+       (prog1 app (setup-routes app))))
+
+   (defvar *handler*)
+
+   (defun is-running ()
+     (and (boundp '*handler*)
+          ,*handler*))
+
+   (defun ensure-started (&rest r &key port)
+     (declare (ignore port))
+     (let ((app (setup)))
+       (values app
+               (setf *handler*
+                     (if (not (is-running))
+                         (apply 'clack:clackup
+                                (lack.builder:builder
+                                 :accesslog
+                                 'fwoar.lack.cors.middleware:cors-middleware
+                                 'fwoar.lack.json.middleware:json-middleware
+                                 app)
+                                r)
+                         ,*handler*)))))
+
+   (defun stop ()
+     (if (is-running)
+         (progn
+           (clack:stop *handler*)
+           (makunbound '*handler*)
+           nil)
+         nil))
+   #+END_SRC
+
+   #+NAME: package-include
+   #+BEGIN_SRC lisp :tangle no :exports none
+   (in-package :fwoar.todo)
+
+   #+END_SRC
+
+   #+NAME: model-utils
+   #+BEGIN_SRC lisp :tangle no :exports none
+   (defparameter *cur-id* 0)
+   (defun next-id ()
+     (incf *cur-id*))
+
+   (defparameter *completed-lens*
+     (data-lens.lenses:make-hash-table-lens "completed"))
+
+   (defun bool-to-yason (bool)
+     (if bool
+         'yason:true
+         'yason:false))
+   #+END_SRC
+
+   #+NAME: example-setup
+   #+BEGIN_SRC lisp :tangle no :noweb yes :exports none
+   <<package-include>>
+   (load "pprint-setup")
+
+   #+END_SRC
+
+#+HTML_HEAD: <style>
+#+HTML_HEAD: :root {
+#+HTML_HEAD:     --zenburn-fg-plus-2: #ffffef;
+#+HTML_HEAD:     --zenburn-fg-plus-1: #f5f5d6;
+#+HTML_HEAD:     --zenburn-fg: #dcdccc;
+#+HTML_HEAD:     --zenburn-bg: #3f3f3f;
+#+HTML_HEAD:     --zenburn-bg-plus-1: #4f4f4f;
+#+HTML_HEAD:     --zenburn-bg-plus-2: #5f5f5f;
+#+HTML_HEAD:     --zenburn-blue: #8cd0d3;
+#+HTML_HEAD: }
+#+HTML_HEAD: 
+#+HTML_HEAD: * {box-sizing: border-box;}
+#+HTML_HEAD: 
+#+HTML_HEAD: body {
+#+HTML_HEAD:     font-size: 1.2rem;
+#+HTML_HEAD:     width: 75rem;
+#+HTML_HEAD:     margin: 0 0 0 25rem;
+#+HTML_HEAD:     background: var(--zenburn-bg);
+#+HTML_HEAD:     color: var(--zenburn-fg);
+#+HTML_HEAD: }
+#+HTML_HEAD: 
+#+HTML_HEAD: a {color: var(--zenburn-blue);}
+#+HTML_HEAD: 
+#+HTML_HEAD: h1, h2, h3, h4, h5, h6 {margin: 0;}
+#+HTML_HEAD: 
+#+HTML_HEAD: pre {margin: 0; box-shadow: none; border-width: 0.5em;}
+#+HTML_HEAD: 
+#+HTML_HEAD: pre.example {
+#+HTML_HEAD:     background-color: var(--zenburn-bg-plus-2);
+#+HTML_HEAD:     color: var(--zenburn-fg-plus-2);
+#+HTML_HEAD:     border: none;
+#+HTML_HEAD:     padding-left: 4em;
+#+HTML_HEAD: }
+#+HTML_HEAD: 
+#+HTML_HEAD: pre.src {
+#+HTML_HEAD:     background-color: var(--zenburn-bg-plus-1);
+#+HTML_HEAD:     border-color: var(--zenburn-bg-plus-2);
+#+HTML_HEAD:     color: var(--zenburn-fg-plus-1);
+#+HTML_HEAD: }
+#+HTML_HEAD: 
+#+HTML_HEAD: pre.src::before {
+#+HTML_HEAD:     background-color: var(--zenburn-bg-plus-1);
+#+HTML_HEAD:     border-color: var(--zenburn-bg-plus-2);
+#+HTML_HEAD:     color: var(--zenburn-fg-plus-1);
+#+HTML_HEAD: }
+#+HTML_HEAD: </style>
+
+# Local Variables:
+# after-save-hook: (lambda nil (when (org-html-export-to-html) (rename-file "README.html" "docs/index.html" t)))
+# End:
