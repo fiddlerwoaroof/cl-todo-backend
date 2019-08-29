@@ -7,7 +7,7 @@
   interface functions that wrap it. In this code, this fset map is
   referenced as =*todo*=, but this is a detail hidden behind the API.
   
-** List-level APIS
+** List-level APIs
    
    These are functions for getting the todo list and clearing it.
 
