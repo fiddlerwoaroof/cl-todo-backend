@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-08-28 Wed 23:22 -->
+<!-- 2019-08-28 Wed 23:38 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>TODO backend implementation using CL and fukamachi/ningle</title>
@@ -212,7 +212,7 @@ background: var(--zenburn-bg);
 color: var(--zenburn-fg);
 }
 a {color: var(--zenburn-blue);}
-h1, h2, h3, h4, h5, h6 {margin: 0;}
+h1, h2, h3, h4, h5, h6 {margin: 0; margin-op: 1.5em;}
 pre {margin: 0; box-shadow: none; border-width: 0.5em;}
 pre.example {
 background-color: var(--zenburn-bg-plus-2);
@@ -285,27 +285,27 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org22e38cd">1. todo API</a>
+<li><a href="#orgd87c65b">1. todo API</a>
 <ul>
-<li><a href="#org30c5989">1.1. List-level APIS</a></li>
-<li><a href="#org676c15a">1.2. Getting/Replacing a todo</a></li>
-<li><a href="#orga9d0c79">1.3. Adding and modifying todos</a></li>
-<li><a href="#org245bf6b">1.4. Examples</a></li>
+<li><a href="#org2c353ea">1.1. List-level APIS</a></li>
+<li><a href="#org32fdb11">1.2. Getting/Replacing a todo</a></li>
+<li><a href="#orge1cc71f">1.3. Adding and modifying todos</a></li>
+<li><a href="#org2d36b4b">1.4. Examples</a></li>
 </ul>
 </li>
-<li><a href="#org2e8a2fb">2. Source</a>
+<li><a href="#org386572e">2. Source</a>
 <ul>
-<li><a href="#orgd099240">2.1. model.lisp source code</a></li>
-<li><a href="#org2e445bb">2.2. routing.lisp source</a></li>
-<li><a href="#org4fedef0">2.3. main.lisp source</a></li>
+<li><a href="#orgf0f55d3">2.1. model.lisp source code</a></li>
+<li><a href="#org82f5700">2.2. routing.lisp source</a></li>
+<li><a href="#orgda1f850">2.3. main.lisp source</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org22e38cd" class="outline-2">
-<h2 id="org22e38cd"><span class="section-number-2">1</span> todo API</h2>
+<div id="outline-container-orgd87c65b" class="outline-2">
+<h2 id="orgd87c65b"><span class="section-number-2">1</span> todo API</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 We use a fairly simple structure for our "database": a fset map (a
@@ -315,15 +315,15 @@ referenced as <code>*todo*</code>, but this is a detail hidden behind the API.
 </p>
 </div>
 
-<div id="outline-container-org30c5989" class="outline-3">
-<h3 id="org30c5989"><span class="section-number-3">1.1</span> List-level APIS</h3>
+<div id="outline-container-org2c353ea" class="outline-3">
+<h3 id="org2c353ea"><span class="section-number-3">1.1</span> List-level APIS</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 These are functions for getting the todo list and clearing it.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="org6199316"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">todos</span> <span style="color: #93a8c6;">()</span>
+<pre class="src src-lisp" id="org087fa11"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">todos</span> <span style="color: #93a8c6;">()</span>
   <span style="color: #93a8c6;">(</span>gmap:gmap <span style="font-weight: bold;">:seq</span>
              <span style="color: #b0b1a3;">(</span><span style="color: #F0DFAF;">lambda</span> <span style="color: #97b098;">(</span>_ b<span style="color: #97b098;">)</span>
                <span style="color: #97b098;">(</span><span style="color: #F0DFAF;">declare</span> <span style="color: #aebed8;">(</span>ignore _<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span>
@@ -338,8 +338,8 @@ These are functions for getting the todo list and clearing it.
 </div>
 </div>
 
-<div id="outline-container-org676c15a" class="outline-3">
-<h3 id="org676c15a"><span class="section-number-3">1.2</span> Getting/Replacing a todo</h3>
+<div id="outline-container-org32fdb11" class="outline-3">
+<h3 id="org32fdb11"><span class="section-number-3">1.2</span> Getting/Replacing a todo</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 This uses lisp's <a href="http://www.lispworks.com/documentation/HyperSpec/Body/05_a.htm">generalized references</a> to abstract away the
@@ -348,7 +348,7 @@ function for removing a todo from the list.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="org1952c5b"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">todo</span> <span style="color: #93a8c6;">(</span>id<span style="color: #93a8c6;">)</span>
+<pre class="src src-lisp" id="org86a9726"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">todo</span> <span style="color: #93a8c6;">(</span>id<span style="color: #93a8c6;">)</span>
   <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">let</span> <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span>todo <span style="color: #aebed8;">(</span>fset:@ *todos* id<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
     todo<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
 
@@ -364,8 +364,8 @@ function for removing a todo from the list.
 </div>
 </div>
 
-<div id="outline-container-orga9d0c79" class="outline-3">
-<h3 id="orga9d0c79"><span class="section-number-3">1.3</span> Adding and modifying todos</h3>
+<div id="outline-container-orge1cc71f" class="outline-3">
+<h3 id="orge1cc71f"><span class="section-number-3">1.3</span> Adding and modifying todos</h3>
 <div class="outline-text-3" id="text-1-3">
 <p>
 <code>new-todo</code> is fairly trivial. It's main feature is that it has to
@@ -375,7 +375,7 @@ properly.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="org32926f6"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">new-todo</span> <span style="color: #93a8c6;">(</span>value<span style="color: #93a8c6;">)</span>
+<pre class="src src-lisp" id="orgcb7cf68"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">new-todo</span> <span style="color: #93a8c6;">(</span>value<span style="color: #93a8c6;">)</span>
   <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">let</span> <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span>id <span style="color: #aebed8;">(</span>next-id<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
     <span style="color: #b0b1a3;">(</span>setf <span style="color: #97b098;">(</span>todo id<span style="color: #97b098;">)</span>
           <span style="color: #97b098;">(</span>alexandria:alist-hash-table
@@ -394,7 +394,7 @@ yason-compatible boolean.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="org81fabb9"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">update-todo</span> <span style="color: #93a8c6;">(</span>id v<span style="color: #93a8c6;">)</span>
+<pre class="src src-lisp" id="orgf7ecf25"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">update-todo</span> <span style="color: #93a8c6;">(</span>id v<span style="color: #93a8c6;">)</span>
   <span style="color: #93a8c6;">(</span>setf <span style="color: #b0b1a3;">(</span>todo id<span style="color: #b0b1a3;">)</span>
         <span style="color: #b0b1a3;">(</span>serapeum:merge-tables <span style="color: #97b098;">(</span>or <span style="color: #aebed8;">(</span>todo id<span style="color: #aebed8;">)</span>
                                    <span style="color: #aebed8;">(</span>make-hash-table <span style="font-weight: bold;">:test</span> 'equal<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span>
@@ -408,8 +408,8 @@ yason-compatible boolean.
 </div>
 </div>
 
-<div id="outline-container-org245bf6b" class="outline-3">
-<h3 id="org245bf6b"><span class="section-number-3">1.4</span> Examples</h3>
+<div id="outline-container-org2d36b4b" class="outline-3">
+<h3 id="org2d36b4b"><span class="section-number-3">1.4</span> Examples</h3>
 <div class="outline-text-3" id="text-1-4">
 <div class="org-src-container">
 <pre class="src src-lisp"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">in-package</span> <span style="font-weight: bold;">:fwoar.todo</span><span style="color: #8c8c8c;">)</span>
@@ -424,10 +424,10 @@ yason-compatible boolean.
 </div>
 
 <pre class="example">
-(#&lt;hash-table "url": "http://localhost:5000/todo/15",
+(#&lt;hash-table "url": "http://localhost:5000/todo/49",
               "title": "get groceries",
               "completed": YASON:FALSE&gt;
- #&lt;hash-table "url": "http://localhost:5000/todo/16",
+ #&lt;hash-table "url": "http://localhost:5000/todo/50",
               "title": "write-better-documentation",
               "completed": YASON:FALSE&gt;)
 </pre>
@@ -435,12 +435,12 @@ yason-compatible boolean.
 </div>
 </div>
 
-<div id="outline-container-org2e8a2fb" class="outline-2">
-<h2 id="org2e8a2fb"><span class="section-number-2">2</span> Source</h2>
+<div id="outline-container-org386572e" class="outline-2">
+<h2 id="org386572e"><span class="section-number-2">2</span> Source</h2>
 <div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-orgd099240" class="outline-3">
-<h3 id="orgd099240"><span class="section-number-3">2.1</span> model.lisp source code</h3>
+<div id="outline-container-orgf0f55d3" class="outline-3">
+<h3 id="orgf0f55d3"><span class="section-number-3">2.1</span> model.lisp source code</h3>
 <div class="outline-text-3" id="text-2-1">
 <div class="org-src-container">
 <pre class="src src-lisp"><span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">[[file:~/git_repos/lisp-sandbox/todo/README.org::package-include][package-include]]</span>
@@ -522,8 +522,8 @@ yason-compatible boolean.
 </div>
 </div>
 
-<div id="outline-container-org2e445bb" class="outline-3">
-<h3 id="org2e445bb"><span class="section-number-3">2.2</span> routing.lisp source</h3>
+<div id="outline-container-org82f5700" class="outline-3">
+<h3 id="org82f5700"><span class="section-number-3">2.2</span> routing.lisp source</h3>
 <div class="outline-text-3" id="text-2-2">
 <div class="org-src-container">
 <pre class="src src-lisp"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">in-package</span> <span style="font-weight: bold;">:fwoar.todo</span><span style="color: #8c8c8c;">)</span>
@@ -569,8 +569,8 @@ yason-compatible boolean.
 </div>
 </div>
 
-<div id="outline-container-org4fedef0" class="outline-3">
-<h3 id="org4fedef0"><span class="section-number-3">2.3</span> main.lisp source</h3>
+<div id="outline-container-orgda1f850" class="outline-3">
+<h3 id="orgda1f850"><span class="section-number-3">2.3</span> main.lisp source</h3>
 <div class="outline-text-3" id="text-2-3">
 <div class="org-src-container">
 <pre class="src src-lisp"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">in-package</span> <span style="font-weight: bold;">:fwoar.todo</span><span style="color: #8c8c8c;">)</span>
@@ -616,7 +616,7 @@ yason-compatible boolean.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Langley</p>
-<p class="date">Created: 2019-08-28 Wed 23:22</p>
+<p class="date">Created: 2019-08-28 Wed 23:38</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

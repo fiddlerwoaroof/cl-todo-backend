@@ -255,7 +255,7 @@
 #+HTML_HEAD: 
 #+HTML_HEAD: a {color: var(--zenburn-blue);}
 #+HTML_HEAD: 
-#+HTML_HEAD: h1, h2, h3, h4, h5, h6 {margin: 0;}
+#+HTML_HEAD: h1, h2, h3, h4, h5, h6 {margin: 0; margin-op: 1.5em;}
 #+HTML_HEAD: 
 #+HTML_HEAD: pre {margin: 0; box-shadow: none; border-width: 0.5em;}
 #+HTML_HEAD: 
