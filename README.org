@@ -9,7 +9,9 @@
   
 ** List-level APIs
    
-   These are functions for getting the todo list and clearing it.
+   These are functions for getting the todo list and clearing
+   it. These are activated by the root route: =todos= for GET requests
+   and =clear-todos= for DELETE requests.
 
    #+NAME: todolist-manipulation
    #+BEGIN_SRC lisp :tangle no
@@ -29,7 +31,8 @@
    
    This uses lisp's [[http://www.lispworks.com/documentation/HyperSpec/Body/05_a.htm][generalized references]] to abstract away the
    storage details of the todos. We also provide a =delete-todo=
-   function for removing a todo from the list.
+   function for removing a todo from the list. =todo= is what backs
+   the GET request for a specific todo by id.
    
    #+NAME: todo-accessor
    #+BEGIN_SRC lisp :tangle no
@@ -51,7 +54,7 @@
    =new-todo= is fairly trivial. It's main feature is that it has to
    make sure the =completed= and =url= keys are set to the appropriate
    values. Completed isn't a lisp boolean, so it serializes to JSON
-   properly.
+   properly. =new-todo= backs POST requests to the root endpoint.
 
    #+NAME: new-todo
    #+BEGIN_SRC lisp :tangle no
@@ -68,7 +71,8 @@
 
    =update-todo= just merges the input from the frontend into the
    relevant todo and then makes sure that the =completed= key is a
-   yason-compatible boolean.
+   yason-compatible boolean. =update-todo= backs PATCH requests to the
+   todo endpoint for a specific ID.
 
    #+NAME: update-todo
    #+BEGIN_SRC lisp :tangle no
