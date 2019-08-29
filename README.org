@@ -1,5 +1,11 @@
 #+TITLE: TODO backend implementation using CL and fukamachi/ningle
 
+* Setup
+
+  - src_sh{git clone https://github.com/fiddlerwoaroof/data-lens.git ~/quicklisp/local-projects/data-lens}
+  - src_sh{git clone https://github.com/fukamachi/lack.git ~/quicklisp/local-projects/lack}
+  - src_sh{sbcl --eval '(asdf:load-asd (truename "todo-backend.asd"))' --eval '(ql:quickload :todo-backend)' --eval '(fwoar.todo::ensure-started)'}
+
 * todo API
 
   We use a fairly simple structure for our "database": a fset map (a
