@@ -59,20 +59,25 @@
            (rutilsx.threading:->>
             value
             (acons "completed" 'yason:false)
-            (acons "url" (format nil "http://~a:~d/todo/~d" *external-host* *external-port* id)))
+            (acons "url"
+                   (format nil "http://~a:~d/todo/~d"
+                           *external-host*
+                           *external-port*
+                           id)))
            :test 'equal))))
 ;; new-todo ends here
 
 ;; [[file:~/git_repos/lisp-sandbox/todo/README.org::update-todo][update-todo]]
 (defun update-todo (id v)
-  (setf (todo id)
-        (serapeum:merge-tables (or (todo id)
-                                   (make-hash-table :test 'equal))
-                               (data-lens.lenses:over *completed-lens*
-                                                      'bool-to-yason
-                                                      (alexandria:alist-hash-table
-                                                       v
-                                                       :test 'equal)))))
+  (let* ((old-todo (or (todo id)
+                       (make-hash-table :test 'equal)))
+         (in-hash-table (alexandria:alist-hash-table v :test 'equal))
+         (update (data-lens.lenses:over *completed-lens*
+                                        'bool-to-yason
+                                        in-hash-table)))
+    (setf (todo id)
+          (serapeum:merge-tables old-todo
+                                 update))))
 ;; update-todo ends here
 
 (defmacro with-fresh-todos (() &body body)
