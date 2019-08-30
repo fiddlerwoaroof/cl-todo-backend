@@ -13,5 +13,5 @@ jobs:
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag cl-todo-backend:$(date +%s)
     - name: build cl-todo-backend
-      run: docker run --eval "(ql:quickload :todo-backend)" --quit
+      run: docker run cl-todo-backend:$(date +%s) --eval "(ql:quickload :todo-backend)" --quit
 
