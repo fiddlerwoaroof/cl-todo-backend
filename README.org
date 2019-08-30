@@ -194,8 +194,8 @@
    
 ** todo routes
 
-   =setup-routes= binds the endpoints to handlers: "/" to handlers
-   that handle the todo lists while "/todo/:id" to handlers that
+   =setup-routes= binds the endpoints to handlers: "​/" to handlers
+   that handle the todo lists while "​/todo​/:id" to handlers that
    handle individual todos.  The =:id= indicates that the
    corresponding segment of the path is bound to =:id= in the param
    alist. =get-id= handles this, and extracts an integer for the id
