@@ -332,7 +332,24 @@
 #+HTML_HEAD:     --zenburn-bg-plus-2: #5f5f5f;
 #+HTML_HEAD:     --zenburn-blue: #8cd0d3;
 #+HTML_HEAD: }
-#+HTML_HEAD: 
+#+HTML_HEAD:
+#+HTML_HEAD: #table-of-contents h2 {
+#+HTML_HEAD:     text-align: center;
+#+HTML_HEAD:     padding-top: 3.5em;
+#+HTML_HEAD: }
+#+HTML_HEAD:
+#+HTML_HEAD: #table-of-contents {
+#+HTML_HEAD:   width: 25rem;
+#+HTML_HEAD:   position: fixed;
+#+HTML_HEAD:   left: 0;
+#+HTML_HEAD:   top: 0;
+#+HTML_HEAD:   height: 100%;
+#+HTML_HEAD:   overflow-y: scroll;
+#+HTML_HEAD:   scrollbar-width: thin;
+#+HTML_HEAD: }
+#+HTML_HEAD:
+#+HTML_HEAD: #table-of-contents::-webkit-scrollbar { width :6px; }
+#+HTML_HEAD:
 #+HTML_HEAD: * {box-sizing: border-box;}
 #+HTML_HEAD: 
 #+HTML_HEAD: body {
@@ -343,7 +360,7 @@
 #+HTML_HEAD:     color: var(--zenburn-fg);
 #+HTML_HEAD:     font-family: "Alegreya Sans", "Lato", "Roboto", "Open Sans", "Helvetica", sans-serif;
 #+HTML_HEAD: }
-#+HTML_HEAD: 
+#+HTML_HEAD:
 #+HTML_HEAD: a {color: var(--zenburn-blue);}
 #+HTML_HEAD: 
 #+HTML_HEAD: h1, h2, h3, h4, h5, h6 {margin: 0; margin-top: 1.5em; margin-bottom: 0.5em;}

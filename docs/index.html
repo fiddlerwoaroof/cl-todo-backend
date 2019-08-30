@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-08-30 Fri 02:37 -->
+<!-- 2019-08-30 Fri 03:12 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>TODO backend implementation using CL and fukamachi/ningle</title>
@@ -203,6 +203,20 @@
 --zenburn-bg-plus-2: #5f5f5f;
 --zenburn-blue: #8cd0d3;
 }
+#table-of-contents h2 {
+text-align: center;
+padding-top: 3.5em;
+}
+#table-of-contents {
+width: 25rem;
+position: fixed;
+left: 0;
+top: 0;
+height: 100%;
+overflow-y: scroll;
+scrollbar-width: thin;
+}
+#table-of-contents::-webkit-scrollbar { width :6px; }
 * {box-sizing: border-box;}
 body {
 font-size: 1.2rem;
@@ -286,34 +300,34 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org2eb4d7d">1. Setup</a></li>
-<li><a href="#org57c534e">2. todo API</a>
+<li><a href="#orga4265f9">1. Setup</a></li>
+<li><a href="#org39e7a12">2. todo API</a>
 <ul>
-<li><a href="#org11f5702">2.1. List-level APIs</a></li>
-<li><a href="#orgc86afbb">2.2. Getting/Replacing a todo</a></li>
-<li><a href="#orgdbc543f">2.3. Adding and modifying todos</a></li>
-<li><a href="#org826caa8">2.4. Examples</a></li>
+<li><a href="#org6ea07f3">2.1. List-level APIs</a></li>
+<li><a href="#org005bb52">2.2. Getting/Replacing a todo</a></li>
+<li><a href="#org77d0812">2.3. Adding and modifying todos</a></li>
+<li><a href="#org09e92d6">2.4. Examples</a></li>
 </ul>
 </li>
-<li><a href="#orgba7379a">3. Routing</a>
+<li><a href="#orgf023b98">3. Routing</a>
 <ul>
-<li><a href="#orgd4959c8">3.1. Routing utilities</a></li>
-<li><a href="#orge718bd4">3.2. todo routes</a></li>
+<li><a href="#org62738a5">3.1. Routing utilities</a></li>
+<li><a href="#org9f65218">3.2. todo routes</a></li>
 </ul>
 </li>
-<li><a href="#org92751d4">4. Source</a>
+<li><a href="#org5597baf">4. Source</a>
 <ul>
-<li><a href="#org0e64bc9">4.1. model.lisp source code</a></li>
-<li><a href="#org4b8ee72">4.2. routing.lisp source</a></li>
-<li><a href="#org9c0e9ef">4.3. main.lisp source</a></li>
+<li><a href="#org80852ef">4.1. model.lisp source code</a></li>
+<li><a href="#orgde4e27d">4.2. routing.lisp source</a></li>
+<li><a href="#org76a7993">4.3. main.lisp source</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org2eb4d7d" class="outline-2">
-<h2 id="org2eb4d7d"><span class="section-number-2">1</span> Setup</h2>
+<div id="outline-container-orga4265f9" class="outline-2">
+<h2 id="orga4265f9"><span class="section-number-2">1</span> Setup</h2>
 <div class="outline-text-2" id="text-1">
 <ul class="org-ul">
 <li><code class="src src-sh">git clone https://github.com/fiddlerwoaroof/data-lens.git ~/quicklisp/local-projects/data-lens</code></li>
@@ -333,8 +347,8 @@ After this, all the tests <a href="http://www.todobackend.com/specs/index.html?h
 </div>
 </div>
 
-<div id="outline-container-org57c534e" class="outline-2">
-<h2 id="org57c534e"><span class="section-number-2">2</span> todo API</h2>
+<div id="outline-container-org39e7a12" class="outline-2">
+<h2 id="org39e7a12"><span class="section-number-2">2</span> todo API</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 We use a fairly simple structure for our "database": a fset map (a
@@ -344,8 +358,8 @@ referenced as <code>*todo*</code>, but this is a detail hidden behind the API.
 </p>
 </div>
 
-<div id="outline-container-org11f5702" class="outline-3">
-<h3 id="org11f5702"><span class="section-number-3">2.1</span> List-level APIs</h3>
+<div id="outline-container-org6ea07f3" class="outline-3">
+<h3 id="org6ea07f3"><span class="section-number-3">2.1</span> List-level APIs</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 These are functions for getting the todo list and clearing
@@ -354,7 +368,7 @@ and <code>clear-todos</code> for DELETE requests.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="org9ed46c9"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">todos</span> <span style="color: #93a8c6;">()</span>
+<pre class="src src-lisp" id="orgcdf7e06"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">todos</span> <span style="color: #93a8c6;">()</span>
   <span style="color: #93a8c6;">(</span>gmap:gmap <span style="font-weight: bold;">:seq</span>
              <span style="color: #b0b1a3;">(</span><span style="color: #F0DFAF;">lambda</span> <span style="color: #97b098;">(</span>_ b<span style="color: #97b098;">)</span>
                <span style="color: #97b098;">(</span><span style="color: #F0DFAF;">declare</span> <span style="color: #aebed8;">(</span>ignore _<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span>
@@ -369,8 +383,8 @@ and <code>clear-todos</code> for DELETE requests.
 </div>
 </div>
 
-<div id="outline-container-orgc86afbb" class="outline-3">
-<h3 id="orgc86afbb"><span class="section-number-3">2.2</span> Getting/Replacing a todo</h3>
+<div id="outline-container-org005bb52" class="outline-3">
+<h3 id="org005bb52"><span class="section-number-3">2.2</span> Getting/Replacing a todo</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 This uses lisp's <a href="http://www.lispworks.com/documentation/HyperSpec/Body/05_a.htm">generalized references</a> to abstract away the
@@ -380,7 +394,7 @@ the GET request for a specific todo by id.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="org1a3f89a"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">todo</span> <span style="color: #93a8c6;">(</span>id<span style="color: #93a8c6;">)</span>
+<pre class="src src-lisp" id="org76060a1"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">todo</span> <span style="color: #93a8c6;">(</span>id<span style="color: #93a8c6;">)</span>
   <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">let</span> <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span>todo <span style="color: #aebed8;">(</span>fset:@ *todos* id<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
     todo<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
 
@@ -396,8 +410,8 @@ the GET request for a specific todo by id.
 </div>
 </div>
 
-<div id="outline-container-orgdbc543f" class="outline-3">
-<h3 id="orgdbc543f"><span class="section-number-3">2.3</span> Adding and modifying todos</h3>
+<div id="outline-container-org77d0812" class="outline-3">
+<h3 id="org77d0812"><span class="section-number-3">2.3</span> Adding and modifying todos</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 <code>new-todo</code> is fairly trivial. It's main feature is that it has to
@@ -407,7 +421,7 @@ properly. <code>new-todo</code> backs POST requests to the root endpoint.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="org6b48f33"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defvar</span> <span style="color: #DC8CC3;">*external-host*</span>
+<pre class="src src-lisp" id="org6d3c13a"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defvar</span> <span style="color: #DC8CC3;">*external-host*</span>
   <span style="color: #D0BF8F;">"localhost"</span><span style="color: #8c8c8c;">)</span>
 <span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defvar</span> <span style="color: #DC8CC3;">*external-port*</span>
   5000<span style="color: #8c8c8c;">)</span>
@@ -432,7 +446,7 @@ todo endpoint for a specific ID.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="orgb43ceb8"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">update-todo</span> <span style="color: #93a8c6;">(</span>id v<span style="color: #93a8c6;">)</span>
+<pre class="src src-lisp" id="org417fe1b"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">update-todo</span> <span style="color: #93a8c6;">(</span>id v<span style="color: #93a8c6;">)</span>
   <span style="color: #93a8c6;">(</span>setf <span style="color: #b0b1a3;">(</span>todo id<span style="color: #b0b1a3;">)</span>
         <span style="color: #b0b1a3;">(</span>serapeum:merge-tables <span style="color: #97b098;">(</span>or <span style="color: #aebed8;">(</span>todo id<span style="color: #aebed8;">)</span>
                                    <span style="color: #aebed8;">(</span>make-hash-table <span style="font-weight: bold;">:test</span> 'equal<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span>
@@ -446,8 +460,8 @@ todo endpoint for a specific ID.
 </div>
 </div>
 
-<div id="outline-container-org826caa8" class="outline-3">
-<h3 id="org826caa8"><span class="section-number-3">2.4</span> Examples</h3>
+<div id="outline-container-org09e92d6" class="outline-3">
+<h3 id="org09e92d6"><span class="section-number-3">2.4</span> Examples</h3>
 <div class="outline-text-3" id="text-2-4">
 <div class="org-src-container">
 <pre class="src src-lisp"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">in-package</span> <span style="font-weight: bold;">:fwoar.todo</span><span style="color: #8c8c8c;">)</span>
@@ -462,10 +476,10 @@ todo endpoint for a specific ID.
 </div>
 
 <pre class="example">
-(#&lt;hash-table "url": "http://localhost:5000/todo/145",
+(#&lt;hash-table "url": "http://localhost:5000/todo/163",
               "title": "get groceries",
               "completed": YASON:FALSE&gt;
- #&lt;hash-table "url": "http://localhost:5000/todo/146",
+ #&lt;hash-table "url": "http://localhost:5000/todo/164",
               "title": "write-better-documentation",
               "completed": YASON:FALSE&gt;)
 </pre>
@@ -474,12 +488,12 @@ todo endpoint for a specific ID.
 </div>
 
 
-<div id="outline-container-orgba7379a" class="outline-2">
-<h2 id="orgba7379a"><span class="section-number-2">3</span> Routing</h2>
+<div id="outline-container-orgf023b98" class="outline-2">
+<h2 id="orgf023b98"><span class="section-number-2">3</span> Routing</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-orgd4959c8" class="outline-3">
-<h3 id="orgd4959c8"><span class="section-number-3">3.1</span> Routing utilities</h3>
+<div id="outline-container-org62738a5" class="outline-3">
+<h3 id="org62738a5"><span class="section-number-3">3.1</span> Routing utilities</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 The core utility here is the <code>defroutes</code> macro.  This takes a
@@ -489,7 +503,7 @@ routes.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="org4dc3755"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defmacro</span> <span style="color: #8CD0D3;">defroutes</span> <span style="color: #93a8c6;">(</span>app <span style="color: #CC9393;">&amp;body</span> routes<span style="color: #93a8c6;">)</span>
+<pre class="src src-lisp" id="org2c08451"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defmacro</span> <span style="color: #8CD0D3;">defroutes</span> <span style="color: #93a8c6;">(</span>app <span style="color: #CC9393;">&amp;body</span> routes<span style="color: #93a8c6;">)</span>
   <span style="color: #93a8c6;">(</span>alexandria:once-only <span style="color: #b0b1a3;">(</span>app<span style="color: #b0b1a3;">)</span>
     `<span style="color: #b0b1a3;">(</span>setf
       ,@<span style="color: #97b098;">(</span><span style="color: #F0DFAF;">loop</span> for <span style="color: #aebed8;">(</span>target . descriptors<span style="color: #aebed8;">)</span> in routes
@@ -518,14 +532,14 @@ a list of verbs <code>(:GET :POST)</code> in the head of each handler clause.
 
 
 <pre class="example">
-(LET ((#:APP1867 APP))
-  (SETF (NINGLE/APP:ROUTE #:APP1867 "/" :METHOD METHOD)
+(LET ((#:APP1876 APP))
+  (SETF (NINGLE/APP:ROUTE #:APP1876 "/" :METHOD METHOD)
           (HANDLER NIL
             (TODOS))
-        (NINGLE/APP:ROUTE #:APP1867 "/" :METHOD METHOD)
+        (NINGLE/APP:ROUTE #:APP1876 "/" :METHOD METHOD)
           (HANDLER (V)
             (NEW-TODO V))
-        (NINGLE/APP:ROUTE #:APP1867 "/" :METHOD METHOD)
+        (NINGLE/APP:ROUTE #:APP1876 "/" :METHOD METHOD)
           (HANDLER NIL
             (CLEAR-TODOS))))
 T
@@ -539,7 +553,7 @@ that all the API results get JSON encoded.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="org2af065f"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">success</span> <span style="color: #93a8c6;">(</span>value<span style="color: #93a8c6;">)</span>
+<pre class="src src-lisp" id="org21fec3a"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">success</span> <span style="color: #93a8c6;">(</span>value<span style="color: #93a8c6;">)</span>
   <span style="color: #93a8c6;">(</span>list 200 '<span style="color: #b0b1a3;">(</span><span style="font-weight: bold;">:conent-type</span> <span style="color: #D0BF8F;">"application/json"</span><span style="color: #b0b1a3;">)</span> value<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
 
 <span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defmacro</span> <span style="color: #8CD0D3;">handler</span> <span style="color: #93a8c6;">(</span><span style="color: #b0b1a3;">(</span><span style="color: #CC9393;">&amp;optional</span> <span style="color: #97b098;">(</span>sym <span style="color: #aebed8;">(</span>gensym <span style="color: #D0BF8F;">"PARAMS"</span><span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span> <span style="color: #CC9393;">&amp;body</span> body<span style="color: #93a8c6;">)</span>
@@ -553,8 +567,8 @@ that all the API results get JSON encoded.
 </div>
 </div>
 
-<div id="outline-container-orge718bd4" class="outline-3">
-<h3 id="orge718bd4"><span class="section-number-3">3.2</span> todo routes</h3>
+<div id="outline-container-org9f65218" class="outline-3">
+<h3 id="org9f65218"><span class="section-number-3">3.2</span> todo routes</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 <code>setup-routes</code> binds the endpoints to handlers: <code>"/"</code> to handlers
@@ -566,7 +580,7 @@ alist. <code>get-id</code> handles this, and extracts an integer for the id
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="org62e314b"><span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">routing</span>
+<pre class="src src-lisp" id="org2d99b0f"><span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">routing</span>
 <span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">get-id</span> <span style="color: #93a8c6;">(</span>params<span style="color: #93a8c6;">)</span>
   <span style="color: #93a8c6;">(</span>parse-integer <span style="color: #b0b1a3;">(</span>serapeum:assocdr <span style="font-weight: bold;">:id</span> params<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
 
@@ -588,12 +602,12 @@ alist. <code>get-id</code> handles this, and extracts an integer for the id
 </div>
 </div>
 
-<div id="outline-container-org92751d4" class="outline-2">
-<h2 id="org92751d4"><span class="section-number-2">4</span> Source</h2>
+<div id="outline-container-org5597baf" class="outline-2">
+<h2 id="org5597baf"><span class="section-number-2">4</span> Source</h2>
 <div class="outline-text-2" id="text-4">
 </div>
-<div id="outline-container-org0e64bc9" class="outline-3">
-<h3 id="org0e64bc9"><span class="section-number-3">4.1</span> model.lisp source code</h3>
+<div id="outline-container-org80852ef" class="outline-3">
+<h3 id="org80852ef"><span class="section-number-3">4.1</span> model.lisp source code</h3>
 <div class="outline-text-3" id="text-4-1">
 <div class="org-src-container">
 <pre class="src src-lisp"><span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">[[file:~/git_repos/lisp-sandbox/todo/README.org::package-include][package-include]]</span>
@@ -680,8 +694,8 @@ alist. <code>get-id</code> handles this, and extracts an integer for the id
 </div>
 </div>
 
-<div id="outline-container-org4b8ee72" class="outline-3">
-<h3 id="org4b8ee72"><span class="section-number-3">4.2</span> routing.lisp source</h3>
+<div id="outline-container-orgde4e27d" class="outline-3">
+<h3 id="orgde4e27d"><span class="section-number-3">4.2</span> routing.lisp source</h3>
 <div class="outline-text-3" id="text-4-2">
 <div class="org-src-container">
 <pre class="src src-lisp"><span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">[[file:~/git_repos/lisp-sandbox/todo/README.org::package-include][package-include]]</span>
@@ -735,8 +749,8 @@ alist. <code>get-id</code> handles this, and extracts an integer for the id
 </div>
 </div>
 
-<div id="outline-container-org9c0e9ef" class="outline-3">
-<h3 id="org9c0e9ef"><span class="section-number-3">4.3</span> main.lisp source</h3>
+<div id="outline-container-org76a7993" class="outline-3">
+<h3 id="org76a7993"><span class="section-number-3">4.3</span> main.lisp source</h3>
 <div class="outline-text-3" id="text-4-3">
 <div class="org-src-container">
 <pre class="src src-lisp"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">in-package</span> <span style="font-weight: bold;">:fwoar.todo</span><span style="color: #8c8c8c;">)</span>
@@ -782,7 +796,7 @@ alist. <code>get-id</code> handles this, and extracts an integer for the id
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Langley</p>
-<p class="date">Created: 2019-08-30 Fri 02:37</p>
+<p class="date">Created: 2019-08-30 Fri 03:12</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
