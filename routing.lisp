@@ -1,16 +1,19 @@
+;; [[file:~/git_repos/lisp-sandbox/todo/README.org::*routing.lisp%20source][routing.lisp source:1]]
+;; [[file:~/git_repos/lisp-sandbox/todo/README.org::package-include][package-include]]
 (in-package :fwoar.todo)
 
+;; package-include ends here
+
+;; [[file:~/git_repos/lisp-sandbox/todo/README.org::routing-helpers][routing-helpers]]
 (defmacro defroutes (app &body routes)
-  "Define a set of routes for given paths. the ROUTES parameter expects this format:
-   ((\"/path/to/{route}\" :method :POST) route-callback) the AS-ROUTE macro helps one
-   avoid binding function values to the route for flexibility."
   (alexandria:once-only (app)
-    `(progn
-       ,@(loop for ((target &key method) callback) in routes
-               collect `(setf (ningle:route ,app ,target :method ,(or method :GET)) ,callback)))))
+    `(setf
+      ,@(loop for (target . descriptors) in routes
+              append (loop for (method callback) in descriptors
+                           append `((ningle:route ,app ,target
+                                                  :method method)
+                                    ,callback))))))
 
-
-;; routing
 (defun success (value)
   (list 200 nil value))
 
@@ -20,19 +23,22 @@
      (success
       (fwoar.lack.json.middleware:wrap-result
        (progn ,@body)))))
+;; routing-helpers ends here
 
+;; routing
 (defun get-id (params)
   (parse-integer (serapeum:assocdr :id params)))
 
 (defun setup-routes (app)
   (defroutes app
-    (("/" :method :GET)            (handler () (todos)))
-    (("/" :method :POST)           (handler (v) (new-todo v)))
-    (("/" :method :DELETE)         (handler () (clear-todos)))
-    (("/todo/:id" :method :GET)    (handler (v) (todo (get-id v))))
-    (("/todo/:id" :method :DELETE) (handler (v)
-                                     (delete-todo (get-id v))
-                                     nil))
-    (("/todo/:id" :method :PATCH)  (handler (v)
-                                     (update-todo (get-id v) 
-                                                  (remove :id v :key #'car))))))
+    ("/" (:GET (handler () (todos)))
+         (:POST (handler (v) (new-todo v)))
+         (:DELETE (handler () (clear-todos))))
+    ("/todo/:id" (:GET    (handler (v) (todo (get-id v))))
+                 (:DELETE (handler (v)
+                            (delete-todo (get-id v))
+                            nil))
+                 (:PATCH  (handler (v)
+                            (update-todo (get-id v) 
+                                         (remove :id v :key #'car)))))))
+;; routing.lisp source:1 ends here

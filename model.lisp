@@ -47,6 +47,11 @@
 ;; todo-accessor ends here
 
 ;; [[file:~/git_repos/lisp-sandbox/todo/README.org::new-todo][new-todo]]
+(defvar *external-host*
+  "localhost")
+(defvar *external-port*
+  5000)
+
 (defun new-todo (value)
   (let ((id (next-id)))
     (setf (todo id)
@@ -54,7 +59,7 @@
            (rutilsx.threading:->>
             value
             (acons "completed" 'yason:false)
-            (acons "url" (format nil "http://localhost:5000/todo/~d" id)))
+            (acons "url" (format nil "http://~a:~d/todo/~d" *external-host* *external-port* id)))
            :test 'equal))))
 ;; new-todo ends here
 

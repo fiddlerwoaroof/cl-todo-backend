@@ -71,6 +71,11 @@
 
    #+NAME: new-todo
    #+BEGIN_SRC lisp :tangle no
+     (defvar *external-host*
+       "localhost")
+     (defvar *external-port*
+       5000)
+
      (defun new-todo (value)
        (let ((id (next-id)))
          (setf (todo id)
@@ -78,7 +83,7 @@
                 (rutilsx.threading:->>
                  value
                  (acons "completed" 'yason:false)
-                 (acons "url" (format nil "http://localhost:5000/todo/~d" id)))
+                 (acons "url" (format nil "http://~a:~d/todo/~d" *external-host* *external-port* id)))
                 :test 'equal))))
    #+END_SRC
 
@@ -118,6 +123,62 @@
    :               "title": "write-better-documentation",
    :               "completed": YASON:FALSE>)
   
+   
+* Routing
+
+** Routing utilities
+
+   The core utility here is the =defroutes= macro.  This takes a
+   sequence of endpoint descriptions which contain nested definitions
+   for HTTP verbs and expands to ningle's functions for manipulating
+   routes.
+   
+   #+BEGIN_SRC lisp :exports both :tangle no :results verbatim
+     (macroexpand-1
+      '(defroutes app
+        ("/"
+         (:GET (handler () (todos)))
+         (:POST (handler (v) (new-todo v)))
+         (:DELETE (handler () (clear-todos))))))
+   #+END_SRC
+
+   #+RESULTS:
+   #+begin_example
+   (LET ((#:APP1852 APP))
+     (SETF (NINGLE/APP:ROUTE #:APP1852 "/" :METHOD METHOD)
+             (HANDLER NIL
+               (TODOS))
+           (NINGLE/APP:ROUTE #:APP1852 "/" :METHOD METHOD)
+             (HANDLER (V)
+               (NEW-TODO V))
+           (NINGLE/APP:ROUTE #:APP1852 "/" :METHOD METHOD)
+             (HANDLER NIL
+               (CLEAR-TODOS))))
+   T
+   #+end_example
+
+   #+NAME: routing-helpers
+   #+BEGIN_SRC lisp
+     (defmacro defroutes (app &body routes)
+       (alexandria:once-only (app)
+         `(setf
+           ,@(loop for (target . descriptors) in routes
+                   append (loop for (method callback) in descriptors
+                                append `((ningle:route ,app ,target
+                                                       :method method)
+                                         ,callback))))))
+
+     (defun success (value)
+       (list 200 nil value))
+
+     (defmacro handler ((&optional (sym (gensym "PARAMS"))) &body body)
+       `(lambda (,sym)
+          (declare (ignorable ,sym))
+          (success
+           (fwoar.lack.json.middleware:wrap-result
+            (progn ,@body)))))
+   #+end_SRC
+
 * Source
 ** model.lisp source code
 
@@ -142,44 +203,27 @@
 
 ** routing.lisp source 
 
-   #+BEGIN_SRC lisp :tangle routing.lisp :noweb yes
-   <<package-include>>
-   (defmacro defroutes (app &body routes)
-     "Define a set of routes for given paths. the ROUTES parameter expects this format:
-      ((\"/path/to/{route}\" :method :POST) route-callback) the AS-ROUTE macro helps one
-      avoid binding function values to the route for flexibility."
-     (alexandria:once-only (app)
-       `(progn
-          ,@(loop for ((target &key method) callback) in routes
-                  collect `(setf (ningle:route ,app ,target :method ,(or method :GET)) ,callback)))))
+   #+BEGIN_SRC lisp :tangle routing.lisp :noweb yes :comments noweb 
+     <<package-include>>
 
+     <<routing-helpers>>
 
-   ;; routing
-   (defun success (value)
-     (list 200 nil value))
+     ;; routing
+     (defun get-id (params)
+       (parse-integer (serapeum:assocdr :id params)))
 
-   (defmacro handler ((&optional (sym (gensym "PARAMS"))) &body body)
-     `(lambda (,sym)
-        (declare (ignorable ,sym))
-        (success
-         (fwoar.lack.json.middleware:wrap-result
-          (progn ,@body)))))
-
-   (defun get-id (params)
-     (parse-integer (serapeum:assocdr :id params)))
-
-   (defun setup-routes (app)
-     (defroutes app
-       (("/" :method :GET)            (handler () (todos)))
-       (("/" :method :POST)           (handler (v) (new-todo v)))
-       (("/" :method :DELETE)         (handler () (clear-todos)))
-       (("/todo/:id" :method :GET)    (handler (v) (todo (get-id v))))
-       (("/todo/:id" :method :DELETE) (handler (v)
-                                        (delete-todo (get-id v))
-                                        nil))
-       (("/todo/:id" :method :PATCH)  (handler (v)
-                                        (update-todo (get-id v) 
-                                                     (remove :id v :key #'car))))))
+     (defun setup-routes (app)
+       (defroutes app
+         ("/" (:GET (handler () (todos)))
+              (:POST (handler (v) (new-todo v)))
+              (:DELETE (handler () (clear-todos))))
+         ("/todo/:id" (:GET    (handler (v) (todo (get-id v))))
+                      (:DELETE (handler (v)
+                                 (delete-todo (get-id v))
+                                 nil))
+                      (:PATCH  (handler (v)
+                                 (update-todo (get-id v) 
+                                              (remove :id v :key #'car)))))))
    #+END_SRC
 
 ** main.lisp source 
