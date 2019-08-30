@@ -4,7 +4,7 @@
 
 ;; package-include ends here
 
-;; [[file:~/git_repos/lisp-sandbox/todo/README.org::routing-helpers][routing-helpers]]
+;; [[file:~/git_repos/lisp-sandbox/todo/README.org::defroutes][defroutes]]
 (defmacro defroutes (app &body routes)
   (alexandria:once-only (app)
     `(setf
@@ -13,9 +13,11 @@
                            append `((ningle:route ,app ,target
                                                   :method method)
                                     ,callback))))))
+;; defroutes ends here
 
+;; [[file:~/git_repos/lisp-sandbox/todo/README.org::routing-helpers][routing-helpers]]
 (defun success (value)
-  (list 200 nil value))
+  (list 200 '(:conent-type "application/json") value))
 
 (defmacro handler ((&optional (sym (gensym "PARAMS"))) &body body)
   `(lambda (,sym)
@@ -25,6 +27,7 @@
        (progn ,@body)))))
 ;; routing-helpers ends here
 
+;; [[file:~/git_repos/lisp-sandbox/todo/README.org::todo-routes][todo-routes]]
 ;; routing
 (defun get-id (params)
   (parse-integer (serapeum:assocdr :id params)))
@@ -41,4 +44,5 @@
                  (:PATCH  (handler (v)
                             (update-todo (get-id v) 
                                          (remove :id v :key #'car)))))))
+;; todo-routes ends here
 ;; routing.lisp source:1 ends here
