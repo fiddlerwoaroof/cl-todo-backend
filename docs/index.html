@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-08-30 Fri 16:33 -->
+<!-- 2019-09-10 Tue 16:30 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>TODO backend implementation using CL and fukamachi/ningle</title>
@@ -300,34 +300,34 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org45f170c">1. Setup</a></li>
-<li><a href="#org750f278">2. todo API</a>
+<li><a href="#org2c60c2a">1. Setup</a></li>
+<li><a href="#org8b48160">2. todo API</a>
 <ul>
-<li><a href="#org47779f4">2.1. List-level APIs</a></li>
-<li><a href="#org57d2aea">2.2. Getting/Replacing a todo</a></li>
-<li><a href="#orgbf48fa4">2.3. Adding and modifying todos</a></li>
-<li><a href="#org87b91ac">2.4. Examples</a></li>
+<li><a href="#orgddfdad7">2.1. List-level APIs</a></li>
+<li><a href="#orge78579a">2.2. Getting/Replacing a todo</a></li>
+<li><a href="#org1d8273a">2.3. Adding and modifying todos</a></li>
+<li><a href="#orgd06e313">2.4. Examples</a></li>
 </ul>
 </li>
-<li><a href="#org6a09bc1">3. Routing</a>
+<li><a href="#orgf16a59b">3. Routing</a>
 <ul>
-<li><a href="#org20ffa7f">3.1. Routing utilities</a></li>
-<li><a href="#org7bdd028">3.2. todo routes</a></li>
+<li><a href="#org8fa2aba">3.1. Routing utilities</a></li>
+<li><a href="#org104511b">3.2. todo routes</a></li>
 </ul>
 </li>
-<li><a href="#orgd46ec32">4. Source</a>
+<li><a href="#org27ea61c">4. Source</a>
 <ul>
-<li><a href="#org9c84f34">4.1. model.lisp source code</a></li>
-<li><a href="#org76ec19a">4.2. routing.lisp source</a></li>
-<li><a href="#org98907a6">4.3. main.lisp source</a></li>
+<li><a href="#orgc9b940b">4.1. model.lisp source code</a></li>
+<li><a href="#orge55bf4b">4.2. routing.lisp source</a></li>
+<li><a href="#org714745a">4.3. main.lisp source</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org45f170c" class="outline-2">
-<h2 id="org45f170c"><span class="section-number-2">1</span> Setup</h2>
+<div id="outline-container-org2c60c2a" class="outline-2">
+<h2 id="org2c60c2a"><span class="section-number-2">1</span> Setup</h2>
 <div class="outline-text-2" id="text-1">
 <ul class="org-ul">
 <li><code class="src src-sh">git clone https://github.com/fiddlerwoaroof/data-lens.git ~/quicklisp/local-projects/data-lens</code></li>
@@ -347,8 +347,8 @@ After this, all the tests <a href="http://www.todobackend.com/specs/index.html?h
 </div>
 </div>
 
-<div id="outline-container-org750f278" class="outline-2">
-<h2 id="org750f278"><span class="section-number-2">2</span> todo API</h2>
+<div id="outline-container-org8b48160" class="outline-2">
+<h2 id="org8b48160"><span class="section-number-2">2</span> todo API</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 We use a fairly simple structure for our "database": a fset map (a
@@ -358,8 +358,8 @@ referenced as <code>*todo*</code>, but this is a detail hidden behind the API.
 </p>
 </div>
 
-<div id="outline-container-org47779f4" class="outline-3">
-<h3 id="org47779f4"><span class="section-number-3">2.1</span> List-level APIs</h3>
+<div id="outline-container-orgddfdad7" class="outline-3">
+<h3 id="orgddfdad7"><span class="section-number-3">2.1</span> List-level APIs</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 These are functions for getting the todo list and clearing
@@ -368,7 +368,7 @@ and <code>clear-todos</code> for DELETE requests.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="orgc8a4ff2"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">todos</span> <span style="color: #93a8c6;">()</span>
+<pre class="src src-lisp" id="org2fa86a6"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">todos</span> <span style="color: #93a8c6;">()</span>
   <span style="color: #93a8c6;">(</span>gmap:gmap <span style="font-weight: bold;">:seq</span>
              <span style="color: #b0b1a3;">(</span><span style="color: #F0DFAF;">lambda</span> <span style="color: #97b098;">(</span>_ b<span style="color: #97b098;">)</span>
                <span style="color: #97b098;">(</span><span style="color: #F0DFAF;">declare</span> <span style="color: #aebed8;">(</span>ignore _<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span>
@@ -383,8 +383,8 @@ and <code>clear-todos</code> for DELETE requests.
 </div>
 </div>
 
-<div id="outline-container-org57d2aea" class="outline-3">
-<h3 id="org57d2aea"><span class="section-number-3">2.2</span> Getting/Replacing a todo</h3>
+<div id="outline-container-orge78579a" class="outline-3">
+<h3 id="orge78579a"><span class="section-number-3">2.2</span> Getting/Replacing a todo</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 This uses lisp's <a href="http://www.lispworks.com/documentation/HyperSpec/Body/05_a.htm">generalized references</a> to abstract away the
@@ -394,7 +394,7 @@ the GET request for a specific todo by id.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="org404baac"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">todo</span> <span style="color: #93a8c6;">(</span>id<span style="color: #93a8c6;">)</span>
+<pre class="src src-lisp" id="orge96683a"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">todo</span> <span style="color: #93a8c6;">(</span>id<span style="color: #93a8c6;">)</span>
   <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">let</span> <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span>todo <span style="color: #aebed8;">(</span>fset:@ *todos* id<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
     todo<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
 
@@ -410,8 +410,8 @@ the GET request for a specific todo by id.
 </div>
 </div>
 
-<div id="outline-container-orgbf48fa4" class="outline-3">
-<h3 id="orgbf48fa4"><span class="section-number-3">2.3</span> Adding and modifying todos</h3>
+<div id="outline-container-org1d8273a" class="outline-3">
+<h3 id="org1d8273a"><span class="section-number-3">2.3</span> Adding and modifying todos</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 <code>new-todo</code> is fairly trivial. It's main feature is that it has to
@@ -421,7 +421,7 @@ properly. <code>new-todo</code> backs POST requests to the root endpoint.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="orgc417af0"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defvar</span> <span style="color: #DC8CC3;">*external-host*</span>
+<pre class="src src-lisp" id="orgf6c3a44"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defvar</span> <span style="color: #DC8CC3;">*external-host*</span>
   <span style="color: #D0BF8F;">"localhost"</span><span style="color: #8c8c8c;">)</span>
 <span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defvar</span> <span style="color: #DC8CC3;">*external-port*</span>
   5000<span style="color: #8c8c8c;">)</span>
@@ -450,7 +450,7 @@ todo endpoint for a specific ID.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="orga2be00f"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">update-todo</span> <span style="color: #93a8c6;">(</span>id v<span style="color: #93a8c6;">)</span>
+<pre class="src src-lisp" id="org0a1e71e"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">update-todo</span> <span style="color: #93a8c6;">(</span>id v<span style="color: #93a8c6;">)</span>
   <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">let*</span> <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span>old-todo <span style="color: #aebed8;">(</span>or <span style="color: #b0b0b3;">(</span>todo id<span style="color: #b0b0b3;">)</span>
                        <span style="color: #b0b0b3;">(</span>make-hash-table <span style="font-weight: bold;">:test</span> 'equal<span style="color: #b0b0b3;">)</span><span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span>
          <span style="color: #97b098;">(</span>in-hash-table <span style="color: #aebed8;">(</span>alexandria:alist-hash-table v <span style="font-weight: bold;">:test</span> 'equal<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span>
@@ -465,8 +465,8 @@ todo endpoint for a specific ID.
 </div>
 </div>
 
-<div id="outline-container-org87b91ac" class="outline-3">
-<h3 id="org87b91ac"><span class="section-number-3">2.4</span> Examples</h3>
+<div id="outline-container-orgd06e313" class="outline-3">
+<h3 id="orgd06e313"><span class="section-number-3">2.4</span> Examples</h3>
 <div class="outline-text-3" id="text-2-4">
 <div class="org-src-container">
 <pre class="src src-lisp"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">in-package</span> <span style="font-weight: bold;">:fwoar.todo</span><span style="color: #8c8c8c;">)</span>
@@ -481,10 +481,10 @@ todo endpoint for a specific ID.
 </div>
 
 <pre class="example">
-(#&lt;hash-table "url": "http://localhost:5000/todo/175",
+(#&lt;hash-table "url": "http://localhost:5000/todo/9",
               "title": "get groceries",
               "completed": YASON:FALSE&gt;
- #&lt;hash-table "url": "http://localhost:5000/todo/176",
+ #&lt;hash-table "url": "http://localhost:5000/todo/10",
               "title": "write-better-documentation",
               "completed": YASON:FALSE&gt;)
 </pre>
@@ -493,12 +493,12 @@ todo endpoint for a specific ID.
 </div>
 
 
-<div id="outline-container-org6a09bc1" class="outline-2">
-<h2 id="org6a09bc1"><span class="section-number-2">3</span> Routing</h2>
+<div id="outline-container-orgf16a59b" class="outline-2">
+<h2 id="orgf16a59b"><span class="section-number-2">3</span> Routing</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-org20ffa7f" class="outline-3">
-<h3 id="org20ffa7f"><span class="section-number-3">3.1</span> Routing utilities</h3>
+<div id="outline-container-org8fa2aba" class="outline-3">
+<h3 id="org8fa2aba"><span class="section-number-3">3.1</span> Routing utilities</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 The core utility here is the <code>defroutes</code> macro.  This takes a
@@ -508,13 +508,13 @@ routes.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="org95e4a72"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defmacro</span> <span style="color: #8CD0D3;">defroutes</span> <span style="color: #93a8c6;">(</span>app <span style="color: #CC9393;">&amp;body</span> routes<span style="color: #93a8c6;">)</span>
+<pre class="src src-lisp" id="org2c1405a"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defmacro</span> <span style="color: #8CD0D3;">defroutes</span> <span style="color: #93a8c6;">(</span>app <span style="color: #CC9393;">&amp;body</span> routes<span style="color: #93a8c6;">)</span>
   <span style="color: #93a8c6;">(</span>alexandria:once-only <span style="color: #b0b1a3;">(</span>app<span style="color: #b0b1a3;">)</span>
     `<span style="color: #b0b1a3;">(</span>setf
       ,@<span style="color: #97b098;">(</span><span style="color: #F0DFAF;">loop</span> for <span style="color: #aebed8;">(</span>target . descriptors<span style="color: #aebed8;">)</span> in routes
               append <span style="color: #aebed8;">(</span><span style="color: #F0DFAF;">loop</span> for <span style="color: #b0b0b3;">(</span>method callback<span style="color: #b0b0b3;">)</span> in descriptors
                            append `<span style="color: #b0b0b3;">(</span><span style="color: #90a890;">(</span>ningle:route ,app ,target
-                                                  <span style="font-weight: bold;">:method</span> method<span style="color: #90a890;">)</span>
+                                                  <span style="font-weight: bold;">:method</span> ,method<span style="color: #90a890;">)</span>
                                     ,callback<span style="color: #b0b0b3;">)</span><span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
 </pre>
 </div>
@@ -537,18 +537,12 @@ a list of verbs <code>(:GET :POST)</code> in the head of each handler clause.
 
 
 <pre class="example">
-(LET ((#:APP1882 APP))
-  (SETF (NINGLE/APP:ROUTE #:APP1882 "/" :METHOD METHOD)
-          (HANDLER NIL
-            (TODOS))
-        (NINGLE/APP:ROUTE #:APP1882 "/" :METHOD METHOD)
-          (HANDLER (V)
-            (NEW-TODO V))
-        (NINGLE/APP:ROUTE #:APP1882 "/" :METHOD METHOD)
-          (HANDLER NIL
-            (CLEAR-TODOS))))
-T
+(DEFROUTES APP
+ ("/" (:GET (HANDLER NIL (TODOS))) (:POST (HANDLER (V) (NEW-TODO V)))
+  (:DELETE (HANDLER NIL (CLEAR-TODOS)))))
+NIL
 </pre>
+
 
 <p>
 Finally, there are some simple helpers to handle some of the
@@ -558,7 +552,7 @@ that all the API results get JSON encoded.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="orgb9cfd08"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">success</span> <span style="color: #93a8c6;">(</span>value<span style="color: #93a8c6;">)</span>
+<pre class="src src-lisp" id="orgd63e2a0"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">success</span> <span style="color: #93a8c6;">(</span>value<span style="color: #93a8c6;">)</span>
   <span style="color: #93a8c6;">(</span>list 200 '<span style="color: #b0b1a3;">(</span><span style="font-weight: bold;">:conent-type</span> <span style="color: #D0BF8F;">"application/json"</span><span style="color: #b0b1a3;">)</span> value<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
 
 <span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defmacro</span> <span style="color: #8CD0D3;">handler</span> <span style="color: #93a8c6;">(</span><span style="color: #b0b1a3;">(</span><span style="color: #CC9393;">&amp;optional</span> <span style="color: #97b098;">(</span>sym <span style="color: #aebed8;">(</span>gensym <span style="color: #D0BF8F;">"PARAMS"</span><span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span> <span style="color: #CC9393;">&amp;body</span> body<span style="color: #93a8c6;">)</span>
@@ -572,8 +566,8 @@ that all the API results get JSON encoded.
 </div>
 </div>
 
-<div id="outline-container-org7bdd028" class="outline-3">
-<h3 id="org7bdd028"><span class="section-number-3">3.2</span> todo routes</h3>
+<div id="outline-container-org104511b" class="outline-3">
+<h3 id="org104511b"><span class="section-number-3">3.2</span> todo routes</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 <code>setup-routes</code> binds the endpoints to handlers: <code>"/"</code> to handlers
@@ -585,7 +579,7 @@ alist. <code>get-id</code> handles this, and extracts an integer for the id
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp" id="org1538a61"><span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">routing</span>
+<pre class="src src-lisp" id="org8c6228c"><span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">routing</span>
 <span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">get-id</span> <span style="color: #93a8c6;">(</span>params<span style="color: #93a8c6;">)</span>
   <span style="color: #93a8c6;">(</span>parse-integer <span style="color: #b0b1a3;">(</span>serapeum:assocdr <span style="font-weight: bold;">:id</span> params<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
 
@@ -607,12 +601,12 @@ alist. <code>get-id</code> handles this, and extracts an integer for the id
 </div>
 </div>
 
-<div id="outline-container-orgd46ec32" class="outline-2">
-<h2 id="orgd46ec32"><span class="section-number-2">4</span> Source</h2>
+<div id="outline-container-org27ea61c" class="outline-2">
+<h2 id="org27ea61c"><span class="section-number-2">4</span> Source</h2>
 <div class="outline-text-2" id="text-4">
 </div>
-<div id="outline-container-org9c84f34" class="outline-3">
-<h3 id="org9c84f34"><span class="section-number-3">4.1</span> model.lisp source code</h3>
+<div id="outline-container-orgc9b940b" class="outline-3">
+<h3 id="orgc9b940b"><span class="section-number-3">4.1</span> model.lisp source code</h3>
 <div class="outline-text-3" id="text-4-1">
 <div class="org-src-container">
 <pre class="src src-lisp"><span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">[[file:~/git_repos/lisp-sandbox/todo/README.org::package-include][package-include]]</span>
@@ -704,8 +698,8 @@ alist. <code>get-id</code> handles this, and extracts an integer for the id
 </div>
 </div>
 
-<div id="outline-container-org76ec19a" class="outline-3">
-<h3 id="org76ec19a"><span class="section-number-3">4.2</span> routing.lisp source</h3>
+<div id="outline-container-orge55bf4b" class="outline-3">
+<h3 id="orge55bf4b"><span class="section-number-3">4.2</span> routing.lisp source</h3>
 <div class="outline-text-3" id="text-4-2">
 <div class="org-src-container">
 <pre class="src src-lisp"><span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">[[file:~/git_repos/lisp-sandbox/todo/README.org::package-include][package-include]]</span>
@@ -720,7 +714,7 @@ alist. <code>get-id</code> handles this, and extracts an integer for the id
       ,@<span style="color: #97b098;">(</span><span style="color: #F0DFAF;">loop</span> for <span style="color: #aebed8;">(</span>target . descriptors<span style="color: #aebed8;">)</span> in routes
               append <span style="color: #aebed8;">(</span><span style="color: #F0DFAF;">loop</span> for <span style="color: #b0b0b3;">(</span>method callback<span style="color: #b0b0b3;">)</span> in descriptors
                            append `<span style="color: #b0b0b3;">(</span><span style="color: #90a890;">(</span>ningle:route ,app ,target
-                                                  <span style="font-weight: bold;">:method</span> method<span style="color: #90a890;">)</span>
+                                                  <span style="font-weight: bold;">:method</span> ,method<span style="color: #90a890;">)</span>
                                     ,callback<span style="color: #b0b0b3;">)</span><span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
 <span style="color: #A6A689; background-color: #2B2B2B;">;; </span><span style="color: #A6A689; background-color: #2B2B2B;">defroutes ends here</span>
 
@@ -759,8 +753,8 @@ alist. <code>get-id</code> handles this, and extracts an integer for the id
 </div>
 </div>
 
-<div id="outline-container-org98907a6" class="outline-3">
-<h3 id="org98907a6"><span class="section-number-3">4.3</span> main.lisp source</h3>
+<div id="outline-container-org714745a" class="outline-3">
+<h3 id="org714745a"><span class="section-number-3">4.3</span> main.lisp source</h3>
 <div class="outline-text-3" id="text-4-3">
 <div class="org-src-container">
 <pre class="src src-lisp"><span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">in-package</span> <span style="font-weight: bold;">:fwoar.todo</span><span style="color: #8c8c8c;">)</span>
@@ -776,8 +770,8 @@ alist. <code>get-id</code> handles this, and extracts an integer for the id
   <span style="color: #93a8c6;">(</span>and <span style="color: #b0b1a3;">(</span>boundp '*handler*<span style="color: #b0b1a3;">)</span>
        *handler*<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
 
-<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">ensure-started</span> <span style="color: #93a8c6;">(</span><span style="color: #CC9393;">&amp;rest</span> r <span style="color: #CC9393;">&amp;key</span> port<span style="color: #93a8c6;">)</span>
-  <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">declare</span> <span style="color: #b0b1a3;">(</span>ignore port<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span>
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">ensure-started</span> <span style="color: #93a8c6;">(</span><span style="color: #CC9393;">&amp;rest</span> r <span style="color: #CC9393;">&amp;key</span> <span style="color: #b0b1a3;">(</span>address <span style="color: #D0BF8F;">"127.0.0.1"</span><span style="color: #b0b1a3;">)</span> <span style="color: #b0b1a3;">(</span>port 5000<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">declare</span> <span style="color: #b0b1a3;">(</span>ignore address port<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span>
   <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">let</span> <span style="color: #b0b1a3;">(</span><span style="color: #97b098;">(</span>app <span style="color: #aebed8;">(</span>setup<span style="color: #aebed8;">)</span><span style="color: #97b098;">)</span><span style="color: #b0b1a3;">)</span>
     <span style="color: #b0b1a3;">(</span>values app
             <span style="color: #97b098;">(</span>setf *handler*
@@ -798,6 +792,11 @@ alist. <code>get-id</code> handles this, and extracts an integer for the id
         <span style="color: #97b098;">(</span>makunbound '*handler*<span style="color: #97b098;">)</span>
         nil<span style="color: #b0b1a3;">)</span>
       nil<span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
+
+<span style="color: #8c8c8c;">(</span><span style="color: #F0DFAF;">defun</span> <span style="color: #8CD0D3;">main</span> <span style="color: #93a8c6;">(</span><span style="color: #CC9393;">&amp;rest</span> _<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">declare</span> <span style="color: #b0b1a3;">(</span>ignore _<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span>ensure-started <span style="font-weight: bold;">:address</span> <span style="color: #D0BF8F;">"0.0.0.0"</span> <span style="font-weight: bold;">:port</span> 5000<span style="color: #93a8c6;">)</span>
+  <span style="color: #93a8c6;">(</span><span style="color: #F0DFAF;">loop</span> <span style="color: #b0b1a3;">(</span>sleep 5<span style="color: #b0b1a3;">)</span><span style="color: #93a8c6;">)</span><span style="color: #8c8c8c;">)</span>
 </pre>
 </div>
 </div>
@@ -806,7 +805,7 @@ alist. <code>get-id</code> handles this, and extracts an integer for the id
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Langley</p>
-<p class="date">Created: 2019-08-30 Fri 16:33</p>
+<p class="date">Created: 2019-09-10 Tue 16:30</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

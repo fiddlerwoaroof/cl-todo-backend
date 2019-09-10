@@ -146,7 +146,7 @@
            ,@(loop for (target . descriptors) in routes
                    append (loop for (method callback) in descriptors
                                 append `((ningle:route ,app ,target
-                                                       :method method)
+                                                       :method ,method)
                                          ,callback))))))
    #+END_SRC
    
@@ -263,40 +263,45 @@
 ** main.lisp source 
 
    #+BEGIN_SRC lisp :tangle main.lisp :noweb yes
-   <<package-include>>
-   ;;; entrypoint
-   (defun setup ()
-     (let ((app (make-instance 'ningle:<app>)))
-       (prog1 app (setup-routes app))))
+     <<package-include>>
+     ;;; entrypoint
+     (defun setup ()
+       (let ((app (make-instance 'ningle:<app>)))
+         (prog1 app (setup-routes app))))
 
-   (defvar *handler*)
+     (defvar *handler*)
 
-   (defun is-running ()
-     (and (boundp '*handler*)
-          ,*handler*))
+     (defun is-running ()
+       (and (boundp '*handler*)
+            ,*handler*))
 
-   (defun ensure-started (&rest r &key port)
-     (declare (ignore port))
-     (let ((app (setup)))
-       (values app
-               (setf *handler*
-                     (if (not (is-running))
-                         (apply 'clack:clackup
-                                (lack.builder:builder
-                                 :accesslog
-                                 'fwoar.lack.cors.middleware:cors-middleware
-                                 'fwoar.lack.json.middleware:json-middleware
-                                 app)
-                                r)
-                         ,*handler*)))))
+     (defun ensure-started (&rest r &key (address "127.0.0.1") (port 5000))
+       (declare (ignore address port))
+       (let ((app (setup)))
+         (values app
+                 (setf *handler*
+                       (if (not (is-running))
+                           (apply 'clack:clackup
+                                  (lack.builder:builder
+                                   :accesslog
+                                   'fwoar.lack.cors.middleware:cors-middleware
+                                   'fwoar.lack.json.middleware:json-middleware
+                                   app)
+                                  r)
+                           ,*handler*)))))
 
-   (defun stop ()
-     (if (is-running)
-         (progn
-           (clack:stop *handler*)
-           (makunbound '*handler*)
-           nil)
-         nil))
+     (defun stop ()
+       (if (is-running)
+           (progn
+             (clack:stop *handler*)
+             (makunbound '*handler*)
+             nil)
+           nil))
+
+     (defun main (&rest _)
+       (declare (ignore _))
+       (ensure-started :address "0.0.0.0" :port 5000)
+       (loop (sleep 5)))
    #+END_SRC
 
    #+NAME: package-include

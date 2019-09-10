@@ -11,7 +11,7 @@
       ,@(loop for (target . descriptors) in routes
               append (loop for (method callback) in descriptors
                            append `((ningle:route ,app ,target
-                                                  :method method)
+                                                  :method ,method)
                                     ,callback))))))
 ;; defroutes ends here
 

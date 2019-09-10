@@ -9,4 +9,4 @@
 
 (defpackage :fwoar.todo
   (:use :cl)
-  (:export ))
+  (:export #:main))

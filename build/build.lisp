@@ -1,17 +1,17 @@
-#.(progn (ql:quickload :legit)
-         nil)
+(in-package :cl-user)
 
-(defun clone-github-repo (user repo)
-  (let ((result-dir (merge-pathnames (make-pathname :directory (list :relative
-                                                                     "quicklisp" "local-projects"
-                                                                     repo)
-                                                    :defaults #p"/")
-                                     (user-homedir-pathname))))
-    (legit:git-clone (format nil "https://github.com/~a/~a.git" user repo)
-                     :directory result-dir)))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun build ()
+    (ql:quickload :todo-backend)
+    (handler-case
+        (progn (setq sb-alien::*shared-objects* nil)
+               (save-lisp-and-die (car (last (uiop:command-line-arguments)))
+                                  :executable t
+                                  :toplevel (find-symbol "MAIN" :fwoar.todo)
+                                  :save-runtime-options t
+                                  :compression 5))
+      (serious-condition (c)
+        (format t "~&fail: ~a~%" c)
+        (sb-ext:exit :code 1)))))
 
-(clone-github-repo "fukamachi" "lack")
-(clone-github-repo "fiddlerwoaroof" "data-lens")
-(clone-github-repo "fiddlerwoaroof" "cl-todo-backend")
-
-(ql:quickload :todo-backend)
+(build)
