@@ -12,6 +12,4 @@ jobs:
     - uses: actions/checkout@v1
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag cl-todo-backend:latest
-    - name: build cl-todo-backend
-      run: docker run cl-todo-backend:latest --eval "(ql:quickload :todo-backend)" --quit
 
