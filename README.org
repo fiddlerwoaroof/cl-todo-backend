@@ -128,7 +128,6 @@
    :               "title": "write-better-documentation",
    :               "completed": YASON:FALSE>)
   
-   
 * Routing
 
 ** Routing utilities
